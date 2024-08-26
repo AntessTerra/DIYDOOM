@@ -12,6 +12,33 @@
 
 #include "cub3d.h"
 
+void	print_WAD(t_box *box)
+{
+	uint32_t	i;
+
+	printf("\nPRINTING DIRECTORIES\n\n");
+	i = -1;
+	while (++i < box->WAD.header.dir_count)
+		printf("%i | %i | %s\n", box->WAD.dirs[i].lump_offset, box->WAD.dirs[i].lump_size, box->WAD.dirs[i].name);
+
+	// uint32_t	m;
+	// printf("\nPRINTING MAPS\n\n");
+	// m = -1;
+	// while (++m < 1)
+	// {
+	// 	printf("%s\n", box->WAD.maps[m].name);
+	// 	i = -1;
+	// 	while (++i < box->WAD.maps[m].n_vertexes)
+	// 		printf("%i | %i \n", box->WAD.maps[m].vertexes[i].x, box->WAD.maps[m].vertexes[i].y);
+	// 	i = -1;
+	// 	while (++i < box->WAD.maps[m].n_linedefs)
+	// 		printf("%i | %i \n", box->WAD.maps[m].linedef[i].start_vertex, box->WAD.maps[m].linedef[i].end_vertex);
+	// 	i = -1;
+	// 	while (++i < box->WAD.maps[m].n_things)
+	// 		printf("%i | %i | %i | %i | %i\n", box->WAD.maps[m].things[i].x, box->WAD.maps[m].things[i].y, box->WAD.maps[m].things[i].angle, box->WAD.maps[m].things[i].type, box->WAD.maps[m].things[i].flags);
+	// }
+}
+
 int	parse_linedefs(t_box *box, uint32_t i, uint16_t m)
 {
 	uint32_t	l;
@@ -37,13 +64,13 @@ int	parse_vertexes(t_box *box, uint32_t i, uint32_t m)
 {
 	uint32_t	v;
 
-	box->WAD.maps[m].n_vertexes = box->WAD.dirs[i].lump_size / sizeof(struct s_vertex);
-	box->WAD.maps[m].vertexes = malloc(box->WAD.dirs[i].lump_size);
-	lseek(box->WAD.fd, box->WAD.dirs[i].lump_offset, SEEK_SET);
 	box->WAD.maps[m].min_x = 0;
 	box->WAD.maps[m].max_x = 0;
 	box->WAD.maps[m].min_y = 0;
 	box->WAD.maps[m].max_y = 0;
+	box->WAD.maps[m].n_vertexes = box->WAD.dirs[i].lump_size / sizeof(struct s_vertex);
+	box->WAD.maps[m].vertexes = malloc(box->WAD.dirs[i].lump_size);
+	lseek(box->WAD.fd, box->WAD.dirs[i].lump_offset, SEEK_SET);
 	v = -1;
 	while (++v < box->WAD.maps[m].n_vertexes)
 	{
@@ -61,6 +88,65 @@ int	parse_vertexes(t_box *box, uint32_t i, uint32_t m)
 	return (0);
 }
 
+int	parse_things(t_box *box, uint32_t i, uint32_t m)
+{
+	uint32_t	t;
+
+	box->WAD.maps[m].n_things = box->WAD.dirs[i].lump_size / sizeof(struct s_thing);
+	box->WAD.maps[m].things = malloc(box->WAD.dirs[i].lump_size);
+	lseek(box->WAD.fd, box->WAD.dirs[i].lump_offset, SEEK_SET);
+	t = -1;
+	while (++t < box->WAD.maps[m].n_things)
+	{
+		read(box->WAD.fd, (void *)&box->WAD.maps[m].things[t].x, 2);
+		read(box->WAD.fd, (void *)&box->WAD.maps[m].things[t].y, 2);
+		read(box->WAD.fd, (void *)&box->WAD.maps[m].things[t].angle, 2);
+		read(box->WAD.fd, (void *)&box->WAD.maps[m].things[t].type, 2);
+		if (box->WAD.maps[m].things[t].type == 1)
+		{
+			box->WAD.maps[m].player.x = box->WAD.maps[m].things[t].x;
+			box->WAD.maps[m].player.y = box->WAD.maps[m].things[t].y;
+			box->WAD.maps[m].player.angle = box->WAD.maps[m].things[t].angle;
+		}
+		read(box->WAD.fd, (void *)&box->WAD.maps[m].things[t].flags, 2);
+	}
+	return (0);
+}
+
+int	parse_nodes(t_box *box, uint32_t i, uint32_t m)
+{
+	uint32_t	n;
+
+	// printf("%i | %i | %s\n", box->WAD.dirs[i].lump_offset, box->WAD.dirs[i].lump_size, box->WAD.dirs[i].name);
+
+	box->WAD.maps[m].n_nodes = box->WAD.dirs[i].lump_size / sizeof(struct s_node);
+	box->WAD.maps[m].bsp_layer = box->WAD.maps[m].n_nodes - 1;
+	box->WAD.maps[m].nodes = malloc(box->WAD.dirs[i].lump_size);
+	lseek(box->WAD.fd, box->WAD.dirs[i].lump_offset, SEEK_SET);
+	n = -1;
+	while (++n < box->WAD.maps[0].n_nodes)
+	{
+		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].partition_x, 2);
+		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].partition_y, 2);
+		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].change_partition_x, 2);
+		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].change_partition_y, 2);
+
+		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].right_box_top, 2);
+		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].right_box_bottom, 2);
+		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].right_box_left, 2);
+		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].right_box_right, 2);
+
+		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].left_box_top, 2);
+		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].left_box_bottom, 2);
+		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].left_box_left, 2);
+		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].left_box_right, 2);
+
+		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].right_child_id, 2);
+		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].left_child_id, 2);
+	}
+	return (0);
+}
+
 int	parse_maps(t_box *box)
 {
 	uint32_t	i, m;
@@ -69,12 +155,18 @@ int	parse_maps(t_box *box)
 	m = -1;
 	while (++i < box->WAD.header.dir_count)
 	{
+		if (m == 1)
+			break ;
 		if (!ft_strncmp(box->WAD.dirs[i].name, "E1M", 3))
 			ft_memcpy(box->WAD.maps[++m].name, box->WAD.dirs[i].name, 5);
 		else if (!ft_strncmp(box->WAD.dirs[i].name, "LINEDEFS", 9))
 			parse_linedefs(box, i, m);
 		else if (!ft_strncmp(box->WAD.dirs[i].name, "VERTEXES", 9))
 			parse_vertexes(box, i, m);
+		else if (!ft_strncmp(box->WAD.dirs[i].name, "THINGS", 7))
+			parse_things(box, i, m);
+		else if (!ft_strncmp(box->WAD.dirs[i].name, "NODES", 6))
+			parse_nodes(box, i, m);
 	}
 	return (0);
 }
@@ -93,7 +185,7 @@ int	parser(t_box *box)
 	read(box->WAD.fd, (void *)&box->WAD.header.dir_count, 4);
 	read(box->WAD.fd, (void *)&box->WAD.header.dir_offset, 4);
 
-	printf("%s | %i | %i\n", box->WAD.header.type, box->WAD.header.dir_count, box->WAD.header.dir_offset);
+	// printf("%s | %i | %i\n", box->WAD.header.type, box->WAD.header.dir_count, box->WAD.header.dir_offset);
 
 	lseek(box->WAD.fd, box->WAD.header.dir_offset, SEEK_SET);
 
@@ -109,26 +201,8 @@ int	parser(t_box *box)
 	}
 	parse_maps(box);
 
-	// uint32_t	m;
-	// printf("\nPRINTING DIRECTORIES\n\n");
-	// i = -1;
-	// while (++i < box->WAD.header.dir_count)
-	// 	printf("%i | %i | %s\n", box->WAD.dirs[i].lump_offset, box->WAD.dirs[i].lump_size, box->WAD.dirs[i].name);
-
-	// printf("\nPRINTING MAPS\n\n");
-	// m = -1;
-	// while (++m < 9)
-	// {
-	// 	printf("%s\n", box->WAD.maps[m].name);
-	// 	i = -1;
-	// 	while (++i < box->WAD.maps[m].n_vertexes)
-	// 		printf("%i | %i \n", box->WAD.maps[m].vertexes[i].x, box->WAD.maps[m].vertexes[i].y);
-	// 	i = -1;
-	// 	while (++i < box->WAD.maps[m].n_linedefs)
-	// 		printf("%i | %i \n", box->WAD.maps[m].linedef[i].start_vertex, box->WAD.maps[m].linedef[i].end_vertex);
-	// }
+	// print_WAD(box);
 
 	close(box->WAD.fd);
 	return (0);
-
 }

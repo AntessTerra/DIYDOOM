@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   btree.c                                            :+:      :+:    :+:   */
+/*   values.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: phelebra <xhelp00@gmail.com>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -12,13 +12,25 @@
 
 #include "cub3d.h"
 
-struct s_node *createNode(int data)
+void	init_textures(t_box *box)
 {
-	(void)data;
-	struct s_node *newNode = (struct s_node *)malloc(sizeof(struct s_node));
-	newNode->data = (void *)"haha";
-	newNode->left = newNode->right = NULL;
-	return (newNode);
-}
+	int		i;
 
+	box->textures = malloc(100 * sizeof(t_image));
+	i = -1;
+	while (++i < 100)
+		box->textures[i].img = NULL;
+	png_file_to_image(box->mlx, &box->textures[UI_PICKUPS], "textures/ui_pickups.png");
+	split_spritesheet(&box->textures[UI_PICKUPS], 8, 5, 16, 16);
+
+	// i = -1;
+	// while (++i < 100)
+	// if (box->textures[i].img == NULL)
+	// {
+	// 	png_file_to_image(box->mlx, &box->textures[i], "textures/missing.png");
+	// 	img_resize(box->mlx, &box->textures[i], 0.5);
+	// }
+	// box->textures[i].addr = (unsigned char *)mlx_get_data_addr(box->textures[i].img,
+		// &box->textures[i].bits_pp, &box->textures[i].line_len, &box->textures[i].endian);
+}
 

@@ -19,7 +19,7 @@ CUTE_PNG = cute_png
 CUTE_SOUND = cute_sound
 UNAME_S := $(shell uname -s)
 
-SRC = main.c hook.c btree.c parser.c
+SRC = main.c hook.c parser.c values.c image.c casting.c
 OBJ = $(SRC:.c=.o)
 
 ifeq ($(UNAME_S),Linux)

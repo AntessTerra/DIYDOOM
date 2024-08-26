@@ -1,4 +1,4 @@
-/* ************************************************************************** */
+	/* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   cub3d.h                                            :+:      :+:    :+:   */
@@ -43,13 +43,7 @@
 # define MOUSE_CONTROL 0
 # define SCREENWIDTH 1280
 # define SCREENHEIGHT 720
-# define TEXTUREWIDTH 64
-# define TEXTUREHEIGHT 64
-# define UDIV 1
-# define VDIV 1
-# define VMOVE 0.0
-# define MINIMAP_OFFSET 10
-# define PI (atan(1) * 4)
+# define LEAF_NODE 0x8000
 
 typedef struct s_image
 {
@@ -80,6 +74,11 @@ typedef struct s_vertex
 	int16_t	y;
 }				t_vertex;
 
+typedef struct s_rect
+{
+	t_vertex	corners[2];
+}				t_rect;
+
 enum e_linedef_flags
 {
 	BLOCKING		= 0,
@@ -104,6 +103,42 @@ typedef struct s_linedef
 	uint16_t	left_sidedef;
 }				t_linedef;
 
+typedef struct s_player
+{
+	int x;
+	int y;
+	int angle;
+}				t_player;
+
+typedef struct s_thing
+{
+	int16_t x;
+	int16_t y;
+	uint16_t angle;
+	uint16_t type;
+	uint16_t flags;
+}				t_thing;
+
+typedef struct s_node
+{
+	int16_t partition_x;
+	int16_t partition_y;
+	int16_t change_partition_x;
+	int16_t change_partition_y;
+
+	int16_t right_box_top;
+	int16_t right_box_bottom;
+	int16_t right_box_left;
+	int16_t right_box_right;
+
+	int16_t left_box_top;
+	int16_t left_box_bottom;
+	int16_t left_box_left;
+	int16_t left_box_right;
+
+	uint16_t right_child_id;
+	uint16_t left_child_id;
+}				t_node;
 typedef struct s_map
 {
 	char		name[5];
@@ -111,10 +146,17 @@ typedef struct s_map
 	t_vertex	*vertexes;
 	uint32_t	n_linedefs;
 	t_linedef	*linedef;
+	uint32_t	n_things;
+	t_thing		*things;
+	uint32_t	n_nodes;
+	t_node		*nodes;
+	t_player	player;
 	int			min_x, max_x;
 	int			min_y, max_y;
 	int			automap_scale_factor;
+	uint32_t	bsp_layer;
 }				t_map;
+
 
 typedef struct s_WAD
 {
@@ -129,20 +171,19 @@ typedef struct s_WAD
 	t_map			maps[9];
 }				t_WAD;
 
+enum e_textures
+{
+	UI_PICKUPS,
+};
+
 typedef struct s_box
 {
 	void			*mlx;
 	void			*win;
 	t_image			image;
+	t_image			*textures;
 	t_WAD			WAD;
 }				t_box;
-
-typedef struct s_node
-{
-	void			*data;
-	struct s_node	*left;
-	struct s_node	*right;
-}				t_node;
 
 //Hook.c
 int			exit_hook(t_box *box);
@@ -152,10 +193,25 @@ int			mouse_press(int keycode, int x, int y, t_box *box);
 int			mouse_release(int keycode, int x, int y, t_box *box);
 int			mouse_move(int x, int y, t_box *box);
 
-//Btree.c
-struct s_node	*createNode(int data);
-
 //Parser.c
 int			parser(t_box *box);
+
+//Values.c
+void		init_textures(t_box *box);
+
+//Image.c
+void		my_mlx_put_image_to_window(t_box *box, t_image *img, int x, int y, int id);
+void		my_mlx_pyxel_put(t_image *img, int x, int y, int color);
+void		draw_line(t_image *image, int beginX, int beginY, int endX, int endY, int color);
+void		draw_rect(t_box *box, t_rect rect, int color);
+t_image		*new_image(void *mlx, t_image *img, int width, int height);
+t_image		*img_resize(void *mlx_ptr, t_image *src_img, float n_times_bigger);
+void		png_file_to_image(void *mlx, t_image *image, char *file);
+void		split_spritesheet(t_image *image, int n_col, int n_row, int one_x, int one_y);
+
+//Casting.c
+int			render_bsp_nodes(t_box *box, int node_id);
+void		draw_automap(t_box *box);
+
 
 #endif

@@ -23,10 +23,12 @@ int	free_stuff(t_box *box)
 
 	free(box->WAD.dirs);
 	m = -1;
-	while (++m < 9)
+	while (++m < 1)
 	{
 		free(box->WAD.maps[m].linedef);
 		free(box->WAD.maps[m].vertexes);
+		free(box->WAD.maps[m].things);
+		free(box->WAD.maps[m].nodes);
 	}
 	return (0);
 }
@@ -77,9 +79,19 @@ int	key_press(int key, t_box *box)
 */
 int	key_release(int key, t_box *box)
 {
-	(void) box;
+	// (void) box;
 	if (key == 65307)
 		exit_hook(box);
+	else if (key == 65362)
+	{
+		if (box->WAD.maps[0].bsp_layer > 0)
+			box->WAD.maps[0].bsp_layer--;
+	}
+	else if (key == 65364)
+	{
+		if (box->WAD.maps[0].bsp_layer < box->WAD.maps[0].n_nodes - 1)
+			box->WAD.maps[0].bsp_layer++;
+	}
 	// printf("Key released: %i\n", key);
 	return (0);
 }
