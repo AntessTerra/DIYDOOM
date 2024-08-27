@@ -70,8 +70,8 @@ typedef struct s_directory
 
 typedef struct s_vertex
 {
-	int16_t	x;
-	int16_t	y;
+	int16_t		x;
+	int16_t		y;
 }				t_vertex;
 
 typedef struct s_rect
@@ -105,40 +105,56 @@ typedef struct s_linedef
 
 typedef struct s_player
 {
-	int x;
-	int y;
-	int angle;
+	int			x;
+	int			y;
+	int			angle;
 }				t_player;
 
 typedef struct s_thing
 {
-	int16_t x;
-	int16_t y;
-	uint16_t angle;
-	uint16_t type;
-	uint16_t flags;
+	int16_t		x;
+	int16_t		y;
+	uint16_t	angle;
+	uint16_t	type;
+	uint16_t	flags;
 }				t_thing;
 
 typedef struct s_node
 {
-	int16_t partition_x;
-	int16_t partition_y;
-	int16_t change_partition_x;
-	int16_t change_partition_y;
+	int16_t		partition_x;
+	int16_t		partition_y;
+	int16_t		change_partition_x;
+	int16_t		change_partition_y;
 
-	int16_t right_box_top;
-	int16_t right_box_bottom;
-	int16_t right_box_left;
-	int16_t right_box_right;
+	int16_t		right_box_top;
+	int16_t		right_box_bottom;
+	int16_t		right_box_left;
+	int16_t		right_box_right;
 
-	int16_t left_box_top;
-	int16_t left_box_bottom;
-	int16_t left_box_left;
-	int16_t left_box_right;
+	int16_t		left_box_top;
+	int16_t		left_box_bottom;
+	int16_t		left_box_left;
+	int16_t		left_box_right;
 
-	uint16_t right_child_id;
-	uint16_t left_child_id;
+	uint16_t	right_child_id;
+	uint16_t	left_child_id;
 }				t_node;
+
+typedef struct s_ssector
+{
+	uint16_t	seg_count;
+	uint16_t	first_seg_id;
+}				t_ssector;
+
+typedef struct s_seg
+{
+	uint16_t	start_vertex_id;
+	uint16_t	end_vertex_id;
+	uint16_t	angle;
+	uint16_t	linedef_id;
+	uint16_t	direction;
+	uint16_t	offset;
+}				t_seg;
 typedef struct s_map
 {
 	char		name[5];
@@ -150,13 +166,16 @@ typedef struct s_map
 	t_thing		*things;
 	uint32_t	n_nodes;
 	t_node		*nodes;
+	uint32_t	n_ssectors;
+	t_ssector	*ssectors;
+	uint32_t	n_segs;
+	t_seg		*segs;
 	t_player	player;
 	int			min_x, max_x;
 	int			min_y, max_y;
 	int			automap_scale_factor;
 	uint32_t	bsp_layer;
 }				t_map;
-
 
 typedef struct s_WAD
 {
@@ -210,7 +229,7 @@ void		png_file_to_image(void *mlx, t_image *image, char *file);
 void		split_spritesheet(t_image *image, int n_col, int n_row, int one_x, int one_y);
 
 //Casting.c
-int			render_bsp_nodes(t_box *box, int node_id);
+void		render_bsp_nodes(t_box *box, int node_id);
 void		draw_automap(t_box *box);
 
 

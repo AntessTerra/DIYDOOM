@@ -16,11 +16,17 @@ int	free_stuff(t_box *box)
 {
 	int m;
 
+	m = -1;
+	while (++m < 100)
+		if (box->textures[m].img)
+			mlx_destroy_image(box->mlx, box->textures[m].img);
+
 	mlx_destroy_image(box->mlx, box->image.img);
 	mlx_destroy_window(box->mlx, box->win);
 	mlx_destroy_display(box->mlx);
 	free(box->mlx);
 
+	free(box->textures);
 	free(box->WAD.dirs);
 	m = -1;
 	while (++m < 1)
@@ -29,6 +35,8 @@ int	free_stuff(t_box *box)
 		free(box->WAD.maps[m].vertexes);
 		free(box->WAD.maps[m].things);
 		free(box->WAD.maps[m].nodes);
+		free(box->WAD.maps[m].ssectors);
+		free(box->WAD.maps[m].segs);
 	}
 	return (0);
 }
@@ -82,16 +90,16 @@ int	key_release(int key, t_box *box)
 	// (void) box;
 	if (key == 65307)
 		exit_hook(box);
-	else if (key == 65362)
-	{
-		if (box->WAD.maps[0].bsp_layer > 0)
-			box->WAD.maps[0].bsp_layer--;
-	}
-	else if (key == 65364)
-	{
-		if (box->WAD.maps[0].bsp_layer < box->WAD.maps[0].n_nodes - 1)
-			box->WAD.maps[0].bsp_layer++;
-	}
+	// else if (key == 65362)
+	// {
+	// 	if (box->WAD.maps[0].bsp_layer > 0)
+	// 		box->WAD.maps[0].bsp_layer--;
+	// }
+	// else if (key == 65364)
+	// {
+	// 	if (box->WAD.maps[0].bsp_layer < box->WAD.maps[0].n_nodes - 1)
+	// 		box->WAD.maps[0].bsp_layer++;
+	// }
 	// printf("Key released: %i\n", key);
 	return (0);
 }

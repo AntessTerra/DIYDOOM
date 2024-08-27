@@ -18,7 +18,7 @@ void	print_WAD(t_box *box)
 
 	printf("\nPRINTING DIRECTORIES\n\n");
 	i = -1;
-	while (++i < box->WAD.header.dir_count)
+	while (++i < 50)
 		printf("%i | %i | %s\n", box->WAD.dirs[i].lump_offset, box->WAD.dirs[i].lump_size, box->WAD.dirs[i].name);
 
 	// uint32_t	m;
@@ -48,15 +48,7 @@ int	parse_linedefs(t_box *box, uint32_t i, uint16_t m)
 	lseek(box->WAD.fd, box->WAD.dirs[i].lump_offset, SEEK_SET);
 	l = -1;
 	while (++l < box->WAD.maps[m].n_linedefs)
-	{
-		read(box->WAD.fd, (void *)&box->WAD.maps[m].linedef[l].start_vertex, 2);
-		read(box->WAD.fd, (void *)&box->WAD.maps[m].linedef[l].end_vertex, 2);
-		read(box->WAD.fd, (void *)&box->WAD.maps[m].linedef[l].flags, 2);
-		read(box->WAD.fd, (void *)&box->WAD.maps[m].linedef[l].line_type, 2);
-		read(box->WAD.fd, (void *)&box->WAD.maps[m].linedef[l].sector_tag, 2);
-		read(box->WAD.fd, (void *)&box->WAD.maps[m].linedef[l].right_sidedef, 2);
-		read(box->WAD.fd, (void *)&box->WAD.maps[m].linedef[l].left_sidedef, 2);
-	}
+		read(box->WAD.fd, (void *)&box->WAD.maps[m].linedef[l], 14);
 	return (0);
 }
 
@@ -98,17 +90,13 @@ int	parse_things(t_box *box, uint32_t i, uint32_t m)
 	t = -1;
 	while (++t < box->WAD.maps[m].n_things)
 	{
-		read(box->WAD.fd, (void *)&box->WAD.maps[m].things[t].x, 2);
-		read(box->WAD.fd, (void *)&box->WAD.maps[m].things[t].y, 2);
-		read(box->WAD.fd, (void *)&box->WAD.maps[m].things[t].angle, 2);
-		read(box->WAD.fd, (void *)&box->WAD.maps[m].things[t].type, 2);
+		read(box->WAD.fd, (void *)&box->WAD.maps[m].things[t], 10);
 		if (box->WAD.maps[m].things[t].type == 1)
 		{
 			box->WAD.maps[m].player.x = box->WAD.maps[m].things[t].x;
 			box->WAD.maps[m].player.y = box->WAD.maps[m].things[t].y;
 			box->WAD.maps[m].player.angle = box->WAD.maps[m].things[t].angle;
 		}
-		read(box->WAD.fd, (void *)&box->WAD.maps[m].things[t].flags, 2);
 	}
 	return (0);
 }
@@ -125,25 +113,33 @@ int	parse_nodes(t_box *box, uint32_t i, uint32_t m)
 	lseek(box->WAD.fd, box->WAD.dirs[i].lump_offset, SEEK_SET);
 	n = -1;
 	while (++n < box->WAD.maps[0].n_nodes)
-	{
-		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].partition_x, 2);
-		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].partition_y, 2);
-		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].change_partition_x, 2);
-		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].change_partition_y, 2);
+		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n], 28);
+	return (0);
+}
 
-		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].right_box_top, 2);
-		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].right_box_bottom, 2);
-		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].right_box_left, 2);
-		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].right_box_right, 2);
+int parse_segs(t_box *box, uint32_t i, uint32_t m)
+{
+	uint32_t	s;
 
-		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].left_box_top, 2);
-		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].left_box_bottom, 2);
-		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].left_box_left, 2);
-		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].left_box_right, 2);
+	box->WAD.maps[m].n_segs = box->WAD.dirs[i].lump_size / sizeof(struct s_seg);
+	box->WAD.maps[m].segs = malloc(box->WAD.dirs[i].lump_size);
+	lseek(box->WAD.fd, box->WAD.dirs[i].lump_offset, SEEK_SET);
+	s = -1;
+	while (++s < box->WAD.maps[m].n_segs)
+		read(box->WAD.fd, (void *)&box->WAD.maps[m].segs[s], 12);
+	return (0);
+}
 
-		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].right_child_id, 2);
-		read(box->WAD.fd, (void *)&box->WAD.maps[m].nodes[n].left_child_id, 2);
-	}
+int	parse_ssectors(t_box *box, uint32_t i, uint32_t m)
+{
+	uint32_t	s;
+
+	box->WAD.maps[m].n_ssectors = box->WAD.dirs[i].lump_size / sizeof(struct s_ssector);
+	box->WAD.maps[m].ssectors = malloc(box->WAD.dirs[i].lump_size);
+	lseek(box->WAD.fd, box->WAD.dirs[i].lump_offset, SEEK_SET);
+	s = -1;
+	while (++s < box->WAD.maps[m].n_ssectors)
+		read(box->WAD.fd, (void *)&box->WAD.maps[m].ssectors[s], 4);
 	return (0);
 }
 
@@ -167,6 +163,10 @@ int	parse_maps(t_box *box)
 			parse_things(box, i, m);
 		else if (!ft_strncmp(box->WAD.dirs[i].name, "NODES", 6))
 			parse_nodes(box, i, m);
+		else if (!ft_strncmp(box->WAD.dirs[i].name, "SEGS", 6))
+			parse_segs(box, i, m);
+		else if (!ft_strncmp(box->WAD.dirs[i].name, "SSECTORS", 6))
+			parse_ssectors(box, i, m);
 	}
 	return (0);
 }
@@ -195,9 +195,7 @@ int	parser(t_box *box)
 	while (++i < box->WAD.header.dir_count)
 	{
 		ft_memset(box->WAD.dirs[i].name, 0 , 9);
-		read(box->WAD.fd, (void *)&box->WAD.dirs[i].lump_offset, 4);
-		read(box->WAD.fd, (void *)&box->WAD.dirs[i].lump_size, 4);
-		read(box->WAD.fd, box->WAD.dirs[i].name, 8);
+		read(box->WAD.fd, (void *)&box->WAD.dirs[i], 16);
 	}
 	parse_maps(box);
 
