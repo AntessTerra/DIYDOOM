@@ -22,6 +22,7 @@ int	free_stuff(t_box *box)
 			mlx_destroy_image(box->mlx, box->textures[m].img);
 
 	mlx_destroy_image(box->mlx, box->image.img);
+	mlx_destroy_image(box->mlx, box->minimap.img);
 	mlx_destroy_window(box->mlx, box->win);
 	mlx_destroy_display(box->mlx);
 	free(box->mlx);
@@ -100,6 +101,16 @@ int	key_release(int key, t_box *box)
 	// 	if (box->WAD.maps[0].bsp_layer < box->WAD.maps[0].n_nodes - 1)
 	// 		box->WAD.maps[0].bsp_layer++;
 	// }
+	else if (key == 65361)
+	{
+		box->WAD.maps[0].player.angle.angle_val += (0.1875f * 10);
+		normalize_360(&box->WAD.maps[0].player.angle.angle_val);
+	}
+	else if (key == 65363)
+	{
+		box->WAD.maps[0].player.angle.angle_val -= (0.1875f * 10);
+		normalize_360(&box->WAD.maps[0].player.angle.angle_val);
+	}
 	// printf("Key released: %i\n", key);
 	return (0);
 }

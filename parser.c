@@ -95,7 +95,7 @@ int	parse_things(t_box *box, uint32_t i, uint32_t m)
 		{
 			box->WAD.maps[m].player.x = box->WAD.maps[m].things[t].x;
 			box->WAD.maps[m].player.y = box->WAD.maps[m].things[t].y;
-			box->WAD.maps[m].player.angle = box->WAD.maps[m].things[t].angle;
+			box->WAD.maps[m].player.angle.angle_val = box->WAD.maps[m].things[t].angle;
 		}
 	}
 	return (0);

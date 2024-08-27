@@ -22,14 +22,41 @@ int	remap_y_to_screen(t_box *box, int y)
 	return (((3500 - (y + (box->WAD.maps[0].min_y * -1))) / box->WAD.maps[0].automap_scale_factor));
 }
 
-void	update_screen(t_box *box)
+void	add_wall_in_fov(t_box *box, t_angle v1, t_angle v2, int color)
+{
+	int v1_x = angle_to_screen(box, v1);
+	int v2_x = angle_to_screen(box, v2);
+
+	if (v1_x < 0 || v2_x < 0)
+		return ;
+	draw_line(&box->image, v1_x, 0, v1_x, SCREENHEIGHT, color);
+	draw_line(&box->image, v2_x, 0, v2_x, SCREENHEIGHT, color);
+}
+
+void	render_fov(t_box *box)
 {
 	uint32_t x, y;
+
+	y = -1;
+	while (++y < SCREENHEIGHT)
+	{
+		x = -1;
+		while (++x < SCREENWIDTH)
+			my_mlx_pyxel_put(&box->image, x, y, 0xFF3e403f);
+	}
+}
+
+void	update_screen(t_box *box)
+{
+
 	my_mlx_put_image_to_window(box, &box->image, 0, 0, -1);
+
+	my_mlx_put_image_to_window(box, &box->minimap, SCREENWIDTH * 0.75, 0, -1);
 	//Draw player icon on location
-	x = remap_x_to_screen(box, box->WAD.maps[0].player.x);
-	y = remap_y_to_screen(box, box->WAD.maps[0].player.y);
-	my_mlx_put_image_to_window(box, &box->textures[UI_PICKUPS], x - 8, y - 8, 27);
+	my_mlx_put_image_to_window(box, &box->textures[UI_PICKUPS],
+		(remap_x_to_screen(box, box->WAD.maps[0].player.x) - 8) + SCREENWIDTH * 0.75,
+		remap_y_to_screen(box, box->WAD.maps[0].player.y) - 8,
+		27);
 }
 
 void	render_subsector(t_box *box, int subsector_id)
@@ -46,14 +73,19 @@ void	render_subsector(t_box *box, int subsector_id)
 		start = box->WAD.maps[0].vertexes[seg.start_vertex_id];
 		end = box->WAD.maps[0].vertexes[seg.end_vertex_id];
 
-		draw_line(&box->image,
-			remap_x_to_screen(box, start.x),
-			remap_y_to_screen(box, start.y),
-			remap_x_to_screen(box, end.x),
-			remap_y_to_screen(box, end.y),
-			rand() % 255 << 16 | rand() % 255 << 8 | rand() % 255);
+		if (clip_vertexes_in_FOV(box, start, end))
+		{
+			int color = rand() % 255 << 16 | rand() % 255 << 8 | rand() % 255;
+			draw_line(&box->minimap,
+				remap_x_to_screen(box, start.x),
+				remap_y_to_screen(box, start.y),
+				remap_x_to_screen(box, end.x),
+				remap_y_to_screen(box, end.y),
+				color);
+			add_wall_in_fov(box, angle_to_vortex(box, start), angle_to_vortex(box, end), color);
+		}
 	}
-	usleep(100000);
+	// usleep(100000);
 	return ;
 }
 
@@ -63,11 +95,11 @@ void	draw_automap(t_box *box)
 	t_vertex	start, end;
 
 	y = -1;
-	while (++y < SCREENHEIGHT)
+	while (++y < SCREENHEIGHT / 4)
 	{
 		x = -1;
-		while (++x < SCREENWIDTH)
-			my_mlx_pyxel_put(&box->image, x, y, 0xFF000000);
+		while (++x < SCREENWIDTH / 4)
+			my_mlx_pyxel_put(&box->minimap, x, y, 0x4D000000);
 	}
 
 	i = -1;
@@ -76,7 +108,7 @@ void	draw_automap(t_box *box)
 		start = box->WAD.maps[0].vertexes[box->WAD.maps[0].linedef[i].start_vertex];
 		end = box->WAD.maps[0].vertexes[box->WAD.maps[0].linedef[i].end_vertex];
 
-		draw_line(&box->image,
+		draw_line(&box->minimap,
 			remap_x_to_screen(box, start.x),
 			remap_y_to_screen(box, start.y),
 			remap_x_to_screen(box, end.x),
@@ -84,7 +116,7 @@ void	draw_automap(t_box *box)
 			0xFFFFFF);
 	}
 	// draw_line(&box->image, 100, 100, 150, 80, 0xFFFFFF);
-	update_screen(box);
+	// update_screen(box);
 }
 
 bool	is_point_on_left_side(t_box *box, int x, int y, int node_id)
@@ -98,21 +130,21 @@ bool	is_point_on_left_side(t_box *box, int x, int y, int node_id)
 void	highlight_nodes(t_box *box, int node_id)
 {
 	t_node	node = box->WAD.maps[0].nodes[node_id];
-	t_rect	rect[2];
-	rect[0].corners[0].x = remap_x_to_screen(box, node.right_box_left);
-	rect[0].corners[0].y = remap_y_to_screen(box, node.right_box_top);
-	rect[0].corners[1].x = remap_x_to_screen(box, node.right_box_right);
-	rect[0].corners[1].y = remap_y_to_screen(box, node.right_box_bottom);
 
-	rect[1].corners[0].x = remap_x_to_screen(box, node.left_box_left);
-	rect[1].corners[0].y = remap_y_to_screen(box, node.left_box_top);
-	rect[1].corners[1].x = remap_x_to_screen(box, node.left_box_right);
-	rect[1].corners[1].y = remap_y_to_screen(box, node.left_box_bottom);
+	draw_rect(box,
+		remap_x_to_screen(box, node.right_box_left),
+		remap_y_to_screen(box, node.right_box_top),
+		remap_x_to_screen(box, node.right_box_right),
+		remap_y_to_screen(box, node.right_box_bottom),
+		0x00FF00);
+	draw_rect(box,
+		remap_x_to_screen(box, node.left_box_left),
+		remap_y_to_screen(box, node.left_box_top),
+		remap_x_to_screen(box, node.left_box_right),
+		remap_y_to_screen(box, node.left_box_bottom),
+		0xFF0000);
 
-	draw_rect(box, rect[0], 0x00FF00);
-	draw_rect(box, rect[1], 0xFF0000);
-
-	draw_line(&box->image,
+	draw_line(&box->minimap,
 		remap_x_to_screen(box, node.partition_x),
 		remap_y_to_screen(box, node.partition_y),
 		remap_x_to_screen(box, node.partition_x + node.change_partition_x),
@@ -127,7 +159,7 @@ void	render_bsp_nodes(t_box *box, int node_id)
 		render_subsector(box, node_id & (~LEAF_NODE));
 		return ;
 	}
-	update_screen(box);
+	// update_screen(box);
 	bool is_point_on_left = is_point_on_left_side(box, box->WAD.maps[0].player.x, box->WAD.maps[0].player.y, node_id);
 
 	if (is_point_on_left)

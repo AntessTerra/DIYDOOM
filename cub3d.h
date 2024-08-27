@@ -44,6 +44,8 @@
 # define SCREENWIDTH 1280
 # define SCREENHEIGHT 720
 # define LEAF_NODE 0x8000
+# define M_PI 3.14159265358979323846
+# define FOV 90
 
 typedef struct s_image
 {
@@ -74,11 +76,6 @@ typedef struct s_vertex
 	int16_t		y;
 }				t_vertex;
 
-typedef struct s_rect
-{
-	t_vertex	corners[2];
-}				t_rect;
-
 enum e_linedef_flags
 {
 	BLOCKING		= 0,
@@ -103,11 +100,16 @@ typedef struct s_linedef
 	uint16_t	left_sidedef;
 }				t_linedef;
 
+typedef struct s_angle
+{
+	float	angle_val;
+}				t_angle;
+
 typedef struct s_player
 {
 	int			x;
 	int			y;
-	int			angle;
+	t_angle		angle;
 }				t_player;
 
 typedef struct s_thing
@@ -200,6 +202,7 @@ typedef struct s_box
 	void			*mlx;
 	void			*win;
 	t_image			image;
+	t_image			minimap;
 	t_image			*textures;
 	t_WAD			WAD;
 }				t_box;
@@ -222,15 +225,23 @@ void		init_textures(t_box *box);
 void		my_mlx_put_image_to_window(t_box *box, t_image *img, int x, int y, int id);
 void		my_mlx_pyxel_put(t_image *img, int x, int y, int color);
 void		draw_line(t_image *image, int beginX, int beginY, int endX, int endY, int color);
-void		draw_rect(t_box *box, t_rect rect, int color);
+void		draw_rect(t_box *box, int beginX, int beginY, int endX, int endY, int color);
 t_image		*new_image(void *mlx, t_image *img, int width, int height);
 t_image		*img_resize(void *mlx_ptr, t_image *src_img, float n_times_bigger);
 void		png_file_to_image(void *mlx, t_image *image, char *file);
 void		split_spritesheet(t_image *image, int n_col, int n_row, int one_x, int one_y);
+void		update_screen(t_box *box);
 
 //Casting.c
 void		render_bsp_nodes(t_box *box, int node_id);
 void		draw_automap(t_box *box);
+void		render_fov(t_box *box);
+
+//Angles.c
+void		normalize_360(float *angle);
+bool		clip_vertexes_in_FOV(t_box *box, t_vertex v1, t_vertex v2);
+int			angle_to_screen(t_box *box, t_angle angle);
+t_angle		angle_to_vortex(t_box *box, t_vertex vortex);
 
 
 #endif

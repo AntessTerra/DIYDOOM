@@ -36,12 +36,12 @@ void	draw_line(t_image *image, int beginX, int beginY, int endX, int endY, int c
 	}
 }
 
-void	draw_rect(t_box *box, t_rect rect, int color)
+void	draw_rect(t_box *box, int beginX, int beginY, int endX, int endY, int color)
 {
-	draw_line(&box->image, rect.corners[0].x, rect.corners[0].y, rect.corners[0].x, rect.corners[1].y, color);
-	draw_line(&box->image, rect.corners[0].x, rect.corners[0].y, rect.corners[1].x, rect.corners[0].y, color);
-	draw_line(&box->image, rect.corners[0].x, rect.corners[1].y, rect.corners[1].x, rect.corners[1].y, color);
-	draw_line(&box->image, rect.corners[1].x, rect.corners[0].y, rect.corners[1].x, rect.corners[1].y, color);
+	draw_line(&box->image, beginX, beginY, beginX, endY, color);
+	draw_line(&box->image, beginX, beginY, endX, beginY, color);
+	draw_line(&box->image, beginX, endY, endX, endY, color);
+	draw_line(&box->image, endX, beginY, endX, endY, color);
 }
 
 /*
