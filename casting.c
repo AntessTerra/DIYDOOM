@@ -82,7 +82,8 @@ void	render_subsector(t_box *box, int subsector_id)
 				remap_x_to_screen(box, end.x),
 				remap_y_to_screen(box, end.y),
 				color);
-			add_wall_in_fov(box, angle_to_vortex(box, start), angle_to_vortex(box, end), color);
+			if (box->WAD.maps[0].linedef[seg.linedef_id].left_sidedef != 0xFFFF)
+				add_wall_in_fov(box, angle_to_vortex(box, start), angle_to_vortex(box, end), color);
 		}
 	}
 	// usleep(100000);

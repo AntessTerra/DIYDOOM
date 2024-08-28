@@ -89,17 +89,6 @@ enum e_linedef_flags
 	DRAW			= 128
 };
 
-typedef struct s_linedef
-{
-	uint16_t	start_vertex;
-	uint16_t	end_vertex;
-	uint16_t	flags;
-	uint16_t	line_type;
-	uint16_t	sector_tag;
-	uint16_t	right_sidedef;
-	uint16_t	left_sidedef;
-}				t_linedef;
-
 typedef struct s_angle
 {
 	float	angle_val;
@@ -111,6 +100,17 @@ typedef struct s_player
 	int			y;
 	t_angle		angle;
 }				t_player;
+
+typedef struct s_linedef
+{
+	uint16_t	start_vertex;
+	uint16_t	end_vertex;
+	uint16_t	flags;
+	uint16_t	line_type;
+	uint16_t	sector_tag;
+	uint16_t	right_sidedef;
+	uint16_t	left_sidedef;
+}				t_linedef;
 
 typedef struct s_thing
 {
@@ -157,6 +157,28 @@ typedef struct s_seg
 	uint16_t	direction;
 	uint16_t	offset;
 }				t_seg;
+
+typedef struct s_sidedef
+{
+	int16_t		x_offset;
+	int16_t		y_offset;
+	char		upper_texture[8];
+	char		lower_texture[8];
+	char		middle_texture[8];
+	uint16_t	sector_id;
+}				t_sidedef;
+
+typedef struct s_sector
+{
+	int16_t		floor_height;
+	int16_t		ceiling_height;
+	char		floor_texture[8];
+	char		ceiling_texture[8];
+	uint16_t	light_level;
+	uint16_t	type;
+	uint16_t	tag;
+}				t_sector;
+
 typedef struct s_map
 {
 	char		name[5];
@@ -172,11 +194,14 @@ typedef struct s_map
 	t_ssector	*ssectors;
 	uint32_t	n_segs;
 	t_seg		*segs;
+	uint32_t	n_sidedefs;
+	t_sidedef	*sidedefs;
+	uint32_t	n_sectors;
+	t_sector	*sectors;
 	t_player	player;
 	int			min_x, max_x;
 	int			min_y, max_y;
 	int			automap_scale_factor;
-	uint32_t	bsp_layer;
 }				t_map;
 
 typedef struct s_WAD

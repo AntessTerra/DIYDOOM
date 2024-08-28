@@ -91,16 +91,6 @@ int	key_release(int key, t_box *box)
 	// (void) box;
 	if (key == 65307)
 		exit_hook(box);
-	// else if (key == 65362)
-	// {
-	// 	if (box->WAD.maps[0].bsp_layer > 0)
-	// 		box->WAD.maps[0].bsp_layer--;
-	// }
-	// else if (key == 65364)
-	// {
-	// 	if (box->WAD.maps[0].bsp_layer < box->WAD.maps[0].n_nodes - 1)
-	// 		box->WAD.maps[0].bsp_layer++;
-	// }
 	else if (key == 65361)
 	{
 		box->WAD.maps[0].player.angle.angle_val += (0.1875f * 10);
