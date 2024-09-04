@@ -14,11 +14,15 @@
 
 int	timer(t_box *box)
 {
+	free_solid_segs(box, 0);
+	add_solid_seg_after(box, new_solid_seg(SCREENWIDTH, INT_MAX, 0), NULL, 0);
+	add_solid_seg_after(box, new_solid_seg(INT_MIN, -1, 0), NULL, 0);
 	render_fov(box);
 	draw_automap(box);
 	render_bsp_nodes(box, box->WAD.maps[0].n_nodes - 1);
 
 	update_screen(box);
+	// print_solid_segs(box, 0);
 	return (0);
 }
 
@@ -39,6 +43,14 @@ int	main(void)
 	mlx_hook(box.win, 4, 1L << 2, mouse_press, &box);
 	mlx_hook(box.win, 5, 1L << 3, mouse_release, &box);
 	mlx_hook(box.win, 6, 1L << 6, mouse_move, &box);
+
+	// render_fov(&box);
+	// draw_automap(&box);
+	// render_bsp_nodes(&box, box.WAD.maps[0].n_nodes - 1);
+
+	// update_screen(&box);
+	// print_solid_segs(&box, 0);
+
 	mlx_loop_hook(box.mlx, timer, &box);
 	mlx_loop(box.mlx);
 	return (0);

@@ -149,8 +149,8 @@ int	parse_maps(t_box *box)
 	m = -1;
 	while (++i < box->WAD.header.dir_count)
 	{
-		if (m == 1)
-			break ;
+		// if (m == 1)
+		// 	break ;
 		if (!ft_strncmp(box->WAD.dirs[i].name, "E1M", 3))
 		{
 			ft_memcpy(box->WAD.maps[++m].name, box->WAD.dirs[i].name, 5);
@@ -195,8 +195,9 @@ int	parser(t_box *box)
 	}
 	parse_maps(box);
 
-	print_WAD(box);
+	// print_WAD(box);
 
 	close(box->WAD.fd);
+	// box->WAD.maps[0].player.angle.angle_val = 270;
 	return (0);
 }

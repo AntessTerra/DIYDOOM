@@ -36,12 +36,37 @@ void	draw_line(t_image *image, int beginX, int beginY, int endX, int endY, int c
 	}
 }
 
-void	draw_rect(t_box *box, int beginX, int beginY, int endX, int endY, int color)
+void	draw_rect(t_box *box, t_rect rect, bool filled)
 {
-	draw_line(&box->image, beginX, beginY, beginX, endY, color);
-	draw_line(&box->image, beginX, beginY, endX, beginY, color);
-	draw_line(&box->image, beginX, endY, endX, endY, color);
-	draw_line(&box->image, endX, beginY, endX, endY, color);
+	(void)filled;
+	uint32_t x, y;
+
+	y = rect.y;
+	while (y++ < rect.y + rect.height)
+	{
+		x = rect.x;
+		while (x++ < rect.x + rect.width)
+			if (!filled)
+			{
+				if (x == rect.x || x == rect.x + rect.width || y == rect.y || y == rect.y + rect.height)
+					my_mlx_pyxel_put(&box->image, x, y, rect.color);
+			}
+			else
+				my_mlx_pyxel_put(&box->image, x, y, rect.color);
+	}
+}
+
+void	fill_screen(t_box *box, uint32_t color)
+{
+	uint32_t x, y;
+
+	y = -1;
+	while (++y < SCREENHEIGHT)
+	{
+		x = -1;
+		while (++x < SCREENWIDTH)
+			my_mlx_pyxel_put(&box->image, x, y, color);
+	}
 }
 
 /*

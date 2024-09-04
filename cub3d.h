@@ -76,6 +76,13 @@ typedef struct s_vertex
 	int16_t		y;
 }				t_vertex;
 
+typedef struct s_rect
+{
+	uint32_t	x, y;
+	uint32_t	width, height;
+	int			color;
+}				t_rect;
+
 enum e_linedef_flags
 {
 	BLOCKING		= 0,
@@ -179,6 +186,14 @@ typedef struct s_sector
 	uint16_t	tag;
 }				t_sector;
 
+typedef struct s_solid_seg
+{
+	int						x_start;
+	int						x_end;
+	int						color;
+	struct s_solid_seg	*next;
+}				t_solid_seg;
+
 typedef struct s_map
 {
 	char		name[5];
@@ -202,6 +217,7 @@ typedef struct s_map
 	int			min_x, max_x;
 	int			min_y, max_y;
 	int			automap_scale_factor;
+	t_solid_seg	*solid_segs;
 }				t_map;
 
 typedef struct s_WAD
@@ -245,12 +261,17 @@ int			parser(t_box *box);
 
 //Values.c
 void		init_textures(t_box *box);
+t_solid_seg	*new_solid_seg(int start, int end, int color);
+void		add_solid_seg_after(t_box *box, t_solid_seg *what, t_solid_seg *where, int m);
+void		free_solid_segs(t_box *box, int m);
+void		print_solid_segs(t_box *box, int m);
+void		clip_wall(t_box *box, t_solid_seg currWall, int m);
 
 //Image.c
 void		my_mlx_put_image_to_window(t_box *box, t_image *img, int x, int y, int id);
 void		my_mlx_pyxel_put(t_image *img, int x, int y, int color);
 void		draw_line(t_image *image, int beginX, int beginY, int endX, int endY, int color);
-void		draw_rect(t_box *box, int beginX, int beginY, int endX, int endY, int color);
+void		draw_rect(t_box *box, t_rect rect, bool filled);
 t_image		*new_image(void *mlx, t_image *img, int width, int height);
 t_image		*img_resize(void *mlx_ptr, t_image *src_img, float n_times_bigger);
 void		png_file_to_image(void *mlx, t_image *image, char *file);
@@ -265,7 +286,7 @@ void		render_fov(t_box *box);
 //Angles.c
 void		normalize_360(float *angle);
 bool		clip_vertexes_in_FOV(t_box *box, t_vertex v1, t_vertex v2);
-int			angle_to_screen(t_box *box, t_angle angle);
+int			angle_to_screen(t_angle angle);
 t_angle		angle_to_vortex(t_box *box, t_vertex vortex);
 
 

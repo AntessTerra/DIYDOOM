@@ -30,7 +30,7 @@ int	free_stuff(t_box *box)
 	free(box->textures);
 	free(box->WAD.dirs);
 	m = -1;
-	while (++m < 1)
+	while (++m < 9)
 	{
 		free(box->WAD.maps[m].linedef);
 		free(box->WAD.maps[m].vertexes);
@@ -38,7 +38,10 @@ int	free_stuff(t_box *box)
 		free(box->WAD.maps[m].nodes);
 		free(box->WAD.maps[m].ssectors);
 		free(box->WAD.maps[m].segs);
+		free(box->WAD.maps[m].sectors);
+		free(box->WAD.maps[m].sidedefs);
 	}
+	free_solid_segs(box, 0);
 	return (0);
 }
 

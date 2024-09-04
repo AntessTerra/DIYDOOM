@@ -3,7 +3,7 @@
 void	normalize_360(float *angle)
 {
 	*angle = fmod(*angle, 360);
-	if (*angle < 0)
+	while (*angle < 0)
 		*angle += 360;
 }
 
@@ -63,20 +63,22 @@ bool	clip_vertexes_in_FOV(t_box *box, t_vertex v1, t_vertex v2)
 	return (true);
 }
 
-int	angle_to_screen(t_box *box, t_angle angle)
+int	angle_to_screen(t_angle angle)
 {
-	int	ix;
+	int	ix = 0;
 
+	// printf("DEBUG: %f° == ", angle.angle_val);
 	if (angle.angle_val > 90)
 	{
 		angle.angle_val -= 90;
-		ix = (box->image.width / 2) - roundf(tanf(angle.angle_val * M_PI / 180) * (box->image.height / 2));
+		ix = (SCREENWIDTH / 2) - round(tanf(angle.angle_val * M_PI / 180.0f) * (SCREENWIDTH / 2));
 	}
 	else
 	{
 		angle.angle_val = 90 - angle.angle_val;
-		ix = (box->image.width / 2) + roundf(tanf(angle.angle_val * M_PI / 180) * (box->image.height / 2));
-		ix += box->image.width / 2;
+		ix = round(tanf(angle.angle_val * M_PI / 180.0f) * (SCREENWIDTH / 2));
+		ix += (SCREENWIDTH / 2);
 	}
+	// printf("%i\n", ix);
 	return (ix);
 }

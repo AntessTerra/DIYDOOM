@@ -24,15 +24,23 @@ int	remap_y_to_screen(t_box *box, int y)
 
 void	add_wall_in_fov(t_box *box, t_angle v1, t_angle v2, int color)
 {
-	int v1_x = angle_to_screen(box, v1);
-	int v2_x = angle_to_screen(box, v2);
+	int v1_x = angle_to_screen(v1);
+	int v2_x = angle_to_screen(v2);
 
-	if (v1_x < 0 || v2_x < 0)
-		return ;
-	draw_line(&box->image, v1_x, 0, v1_x, SCREENHEIGHT, color);
-	draw_line(&box->image, v2_x, 0, v2_x, SCREENHEIGHT, color);
+	if (v1_x < 0)
+		v1_x = 0;
+	if (v2_x < 0)
+		v2_x = 0;
+	if (v1_x > SCREENWIDTH)
+		v1_x = SCREENWIDTH;
+	if (v2_x > SCREENWIDTH)
+		v2_x = SCREENWIDTH;
+	// printf("%i | %i\n", v1_x, v2_x);
+	// draw_line(&box->image, v1_x, 0, v1_x, SCREENHEIGHT, color);
+	// draw_line(&box->image, v2_x, 0, v2_x, SCREENHEIGHT, color);
+	clip_wall(box, (t_solid_seg){v1_x, v2_x, color, NULL}, 0);
+	// (void)color;
 }
-
 void	render_fov(t_box *box)
 {
 	uint32_t x, y;
@@ -48,7 +56,6 @@ void	render_fov(t_box *box)
 
 void	update_screen(t_box *box)
 {
-
 	my_mlx_put_image_to_window(box, &box->image, 0, 0, -1);
 
 	my_mlx_put_image_to_window(box, &box->minimap, SCREENWIDTH * 0.75, 0, -1);
@@ -75,19 +82,17 @@ void	render_subsector(t_box *box, int subsector_id)
 
 		if (clip_vertexes_in_FOV(box, start, end))
 		{
-			int color = rand() % 255 << 16 | rand() % 255 << 8 | rand() % 255;
+			int *color = (int*)(box->WAD.maps[0].sidedefs[box->WAD.maps[0].linedef[seg.linedef_id].right_sidedef].lower_texture);
 			draw_line(&box->minimap,
 				remap_x_to_screen(box, start.x),
 				remap_y_to_screen(box, start.y),
 				remap_x_to_screen(box, end.x),
 				remap_y_to_screen(box, end.y),
-				color);
-			if (box->WAD.maps[0].linedef[seg.linedef_id].left_sidedef != 0xFFFF)
-				add_wall_in_fov(box, angle_to_vortex(box, start), angle_to_vortex(box, end), color);
+				*color);
+			if (box->WAD.maps[0].linedef[seg.linedef_id].left_sidedef == 0xFFFF)
+				add_wall_in_fov(box, angle_to_vortex(box, start), angle_to_vortex(box, end), *color);
 		}
 	}
-	// usleep(100000);
-	return ;
 }
 
 void	draw_automap(t_box *box)
@@ -116,8 +121,6 @@ void	draw_automap(t_box *box)
 			remap_y_to_screen(box, end.y),
 			0xFFFFFF);
 	}
-	// draw_line(&box->image, 100, 100, 150, 80, 0xFFFFFF);
-	// update_screen(box);
 }
 
 bool	is_point_on_left_side(t_box *box, int x, int y, int node_id)
@@ -128,30 +131,30 @@ bool	is_point_on_left_side(t_box *box, int x, int y, int node_id)
 	return (((dx * box->WAD.maps[0].nodes[node_id].change_partition_y) - (dy * box->WAD.maps[0].nodes[node_id].change_partition_x)) <= 0);
 }
 
-void	highlight_nodes(t_box *box, int node_id)
-{
-	t_node	node = box->WAD.maps[0].nodes[node_id];
+// void	highlight_nodes(t_box *box, int node_id)
+// {
+// 	t_node	node = box->WAD.maps[0].nodes[node_id];
 
-	draw_rect(box,
-		remap_x_to_screen(box, node.right_box_left),
-		remap_y_to_screen(box, node.right_box_top),
-		remap_x_to_screen(box, node.right_box_right),
-		remap_y_to_screen(box, node.right_box_bottom),
-		0x00FF00);
-	draw_rect(box,
-		remap_x_to_screen(box, node.left_box_left),
-		remap_y_to_screen(box, node.left_box_top),
-		remap_x_to_screen(box, node.left_box_right),
-		remap_y_to_screen(box, node.left_box_bottom),
-		0xFF0000);
+// 	draw_rect(box,
+// 		remap_x_to_screen(box, node.right_box_left),
+// 		remap_y_to_screen(box, node.right_box_top),
+// 		remap_x_to_screen(box, node.right_box_right),
+// 		remap_y_to_screen(box, node.right_box_bottom),
+// 		0x00FF00);
+// 	draw_rect(box,
+// 		remap_x_to_screen(box, node.left_box_left),
+// 		remap_y_to_screen(box, node.left_box_top),
+// 		remap_x_to_screen(box, node.left_box_right),
+// 		remap_y_to_screen(box, node.left_box_bottom),
+// 		0xFF0000);
 
-	draw_line(&box->minimap,
-		remap_x_to_screen(box, node.partition_x),
-		remap_y_to_screen(box, node.partition_y),
-		remap_x_to_screen(box, node.partition_x + node.change_partition_x),
-		remap_y_to_screen(box, node.partition_y + node.change_partition_y),
-		0x0000FF);
-}
+// 	draw_line(&box->minimap,
+// 		remap_x_to_screen(box, node.partition_x),
+// 		remap_y_to_screen(box, node.partition_y),
+// 		remap_x_to_screen(box, node.partition_x + node.change_partition_x),
+// 		remap_y_to_screen(box, node.partition_y + node.change_partition_y),
+// 		0x0000FF);
+// }
 
 void	render_bsp_nodes(t_box *box, int node_id)
 {
