@@ -10,30 +10,44 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "cub3d.h"
+#include "doom-nukem.h"
 
-int	timer(t_box *box)
+/** timer()
+ * 	-------
+ *
+ *  Timer function that is called every frame
+ *
+ * 	param: t_box *box
+ * 	return: 0
+ */
+static int	timer(t_box *box)
 {
-	free_solid_segs(box, 0);
-	add_solid_seg_after(box, new_solid_seg(SCREENWIDTH, INT_MAX, 0), NULL, 0);
-	add_solid_seg_after(box, new_solid_seg(INT_MIN, -1, 0), NULL, 0);
-	render_fov(box);
-	draw_automap(box);
-	render_bsp_nodes(box, box->WAD.maps[0].n_nodes - 1);
-
 	update_screen(box);
-	// print_solid_segs(box, 0);
 	return (0);
 }
 
+/** main()
+ * 	------
+ *
+ *  Main function that initializes the mlx window and hooks
+ *  Calls the parser to parse the WAD file
+ *  Initializes the values and textures
+ *  Creates the images for the window and minimap
+ *  Hooks the events to the mlx window
+ *  Calls the timer function to render the game
+ *  Loops the mlx
+ *
+ * 	return: 0
+ */
 int	main(void)
 {
 	t_box	box;
 
 	parser(&box);
-	box.WAD.maps[0].automap_scale_factor = 20;
+
 	box.mlx = mlx_init();
 	box.win = mlx_new_window(box.mlx, SCREENWIDTH, SCREENHEIGHT, "doom-nukem");
+	init_values(&box);
 	init_textures(&box);
 	new_image(box.mlx, &box.image, SCREENWIDTH, SCREENHEIGHT);
 	new_image(box.mlx, &box.minimap, SCREENWIDTH / 4, SCREENHEIGHT / 4);

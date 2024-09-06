@@ -10,8 +10,18 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "cub3d.h"
+#include "doom-nukem.h"
 
+/**
+ * free_stuff()
+ * ------------
+ *
+ * Frees all the allocated memory
+ *
+ * param: t_box *box
+ *
+ * return: 0
+ */
 int	free_stuff(t_box *box)
 {
 	int m;
@@ -41,10 +51,23 @@ int	free_stuff(t_box *box)
 		free(box->WAD.maps[m].sectors);
 		free(box->WAD.maps[m].sidedefs);
 	}
-	free_solid_segs(box, 0);
+	free_solid_segs(box);
+	free(box->map->screen_x_to_angle);
 	return (0);
 }
 
+/**
+ * mouse_move()
+ * ------------
+ *
+ * Processes mouse movement
+ *
+ * param: int x
+ * param: int y
+ * param: t_box *box
+ *
+ * return: 0
+ */
 int	mouse_move(int x, int y, t_box *box)
 {
 	(void) box;
@@ -54,6 +77,19 @@ int	mouse_move(int x, int y, t_box *box)
 	return (0);
 }
 
+/**
+ * mouse_press()
+ * -------------
+ *
+ * Processes pressed mouse button
+ *
+ * param: int keycode
+ * param: int x
+ * param: int y
+ * param: t_box *box
+ *
+ * return: 0
+ */
 int	mouse_press(int keycode, int x, int y, t_box *box)
 {
 	(void)x;
@@ -64,6 +100,20 @@ int	mouse_press(int keycode, int x, int y, t_box *box)
 	return (0);
 }
 
+/**
+ * mouse_release()
+ * ---------------
+ *
+ * Processes released mouse button
+ *
+ * param: int keycode
+ * param: int x
+ * param: int y
+ * param: t_box *box
+ *
+ * return: 0
+ *
+ */
 int	mouse_release(int keycode, int x, int y, t_box *box)
 {
 	(void)x;
@@ -73,10 +123,18 @@ int	mouse_release(int keycode, int x, int y, t_box *box)
 	return (0);
 }
 
-/*	Key_press
-
-	Processes pressed down key
-*/
+/**
+ * key_press()
+ * -----------
+ *
+ * Processes pressed key
+ *
+ * param: int key
+ * param: t_box *box
+ *
+ * return: 0
+ *
+ */
 int	key_press(int key, t_box *box)
 {
 	(void) box;
@@ -85,33 +143,71 @@ int	key_press(int key, t_box *box)
 	return (0);
 }
 
-/*	Key_release
-
-	Processes let up key
-*/
+/**
+ * key_release()
+ * -------------
+ *
+ * Processes released key
+ *
+ * param: int key
+ * param: t_box *box
+ *
+ * return: 0
+ *
+ */
 int	key_release(int key, t_box *box)
 {
 	// (void) box;
-	if (key == 65307)
+	if (key == 65307) // esc key
 		exit_hook(box);
-	else if (key == 65361)
+	else if (key == 65361) // left arrow key
 	{
 		box->WAD.maps[0].player.angle.angle_val += (0.1875f * 10);
 		normalize_360(&box->WAD.maps[0].player.angle.angle_val);
 	}
-	else if (key == 65363)
+	else if (key == 65363) // right arrow key
 	{
 		box->WAD.maps[0].player.angle.angle_val -= (0.1875f * 10);
 		normalize_360(&box->WAD.maps[0].player.angle.angle_val);
 	}
+	else if (key == 'w')
+	{
+		box->map->player.x += cos(box->map->player.angle.angle_val) * box->map->player.move_speed;
+		box->map->player.y += sin(box->map->player.angle.angle_val) * box->map->player.move_speed;
+	}
+	else if (key == 's')
+	{
+		box->map->player.x -= cos(box->map->player.angle.angle_val) * box->map->player.move_speed;
+		box->map->player.y -= sin(box->map->player.angle.angle_val) * box->map->player.move_speed;
+	}
+	else if (key == 'a')
+	{
+		box->map->player.x += cos(box->map->player.angle.angle_val) * box->map->player.move_speed;
+		box->map->player.y -= sin(box->map->player.angle.angle_val) * box->map->player.move_speed;
+	}
+	else if (key == 'd')
+	{
+		box->map->player.x -= cos(box->map->player.angle.angle_val) * box->map->player.move_speed;
+		box->map->player.y += sin(box->map->player.angle.angle_val) * box->map->player.move_speed;
+	}
+	// else if (key == 65453 && box->WAD.m > 0) // - numpad key
+	// 		box->WAD.m--;
+	// else if (key == 65363 && box->WAD.m < N_MAPS) // + numpad key
+	// 		box->WAD.m++;
 	// printf("Key released: %i\n", key);
 	return (0);
 }
 
-/*	Exit_hook
-
-	Closes the window when the x in the corner is pressed
-*/
+/**
+ * exit_hook()
+ * -----------
+ *
+ * Exits the program
+ *
+ * param: t_box *box
+ * return: 0
+ *
+ */
 int	exit_hook(t_box *box)
 {
 	free_stuff(box);

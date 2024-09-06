@@ -10,8 +10,19 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "cub3d.h"
+#include "doom-nukem.h"
 
+/**
+ * sorted_insert()
+ * ---------------
+ *
+ * Inserts a solid segment in a sorted linked list
+ *
+ * param: t_solid_seg *node
+ * param: t_solid_seg *sorted
+ *
+ * return: t_solid_seg *
+ */
 t_solid_seg	*sorted_insert(t_solid_seg *node, t_solid_seg *sorted)
 {
 	if (sorted == NULL || sorted->x_start >= node->x_start)
@@ -31,11 +42,21 @@ t_solid_seg	*sorted_insert(t_solid_seg *node, t_solid_seg *sorted)
 	return (sorted);
 }
 
+/**
+ * insertion_sort()
+ * ----------------
+ *
+ * Sorts the solid segments in a current map
+ *
+ * param: t_box *box
+ *
+ * return: 0
+ */
 void	insertion_sort(t_box *box)
 {
 	t_solid_seg	*curr, *next, *sorted;
 	sorted = NULL;
-	curr = box->WAD.maps[0].solid_segs;
+	curr = box->map->solid_segs;
 
 	while (curr != NULL)
 	{
@@ -45,9 +66,21 @@ void	insertion_sort(t_box *box)
 
 		curr = next;
 	}
-	box->WAD.maps[0].solid_segs = sorted;
+	box->map->solid_segs = sorted;
 }
 
+/**
+ * new_solid_seg()
+ * ---------------
+ *
+ * Creates a new solid segment
+ *
+ * param: int start
+ * param: int end
+ * param: int color
+ *
+ * return: t_solid_seg *
+ */
 t_solid_seg	*new_solid_seg(int start, int end, int color)
 {
 	t_solid_seg	*seg;
@@ -60,16 +93,28 @@ t_solid_seg	*new_solid_seg(int start, int end, int color)
 	return (seg);
 }
 
-void	add_solid_seg_after(t_box *box, t_solid_seg *what, t_solid_seg *where, int m)
+/**
+ * add_solid_seg_after()
+ * ---------------------
+ *
+ * Adds a solid segment after a given segment
+ *
+ * param: t_box *box
+ * param: t_solid_seg *what
+ * param: t_solid_seg *where
+ *
+ * return: 0
+ */
+void	add_solid_seg_after(t_box *box, t_solid_seg *what, t_solid_seg *where)
 {
 	t_solid_seg	*curr, *tmp;
 
-	if (box->WAD.maps[m].solid_segs == NULL)
+	if (box->map->solid_segs == NULL)
 	{
-		box->WAD.maps[m].solid_segs = what;
+		box->map->solid_segs = what;
 		return ;
 	}
-	curr = box->WAD.maps[m].solid_segs;
+	curr = box->map->solid_segs;
 	while (curr->next)
 	{
 		if (curr == where)
@@ -85,23 +130,50 @@ void	add_solid_seg_after(t_box *box, t_solid_seg *what, t_solid_seg *where, int 
 	insertion_sort(box);
 }
 
-void	free_solid_segs(t_box *box, int m)
+/**
+ * free_solid_segs()
+ * -----------------
+ *
+ * Frees all the solid segments stored in a current map
+ *
+ * param: t_box *box
+ *
+ * return: 0
+ */
+void	free_solid_segs(t_box *box)
 {
 	t_solid_seg	*tmp;
+	// int			m;
 
-	while (box->WAD.maps[m].solid_segs)
-	{
-		tmp = box->WAD.maps[m].solid_segs;
-		box->WAD.maps[m].solid_segs = (box->WAD.maps[m].solid_segs)->next;
-		free(tmp);
-	}
+	// m = -1;
+	// while (++m < N_MAPS)
+	// {
+		while (box->map->solid_segs)
+		{
+			tmp = box->map->solid_segs;
+			box->map->solid_segs = (box->map->solid_segs)->next;
+			free(tmp);
+		}
+	// }
 }
 
-void	delete_seg(t_box *box, t_solid_seg *seg, int m)
+/**
+ * delete_seg()
+ * ------------------
+ *
+ * Prints all segments stored in a current map
+ *
+ * param: t_box *box
+ * param: t_solid_seg *seg
+
+ *
+ * return: 0
+ */
+void	delete_seg(t_box *box, t_solid_seg *seg)
 {
 	t_solid_seg	*tmp;
 
-	tmp = box->WAD.maps[m].solid_segs;
+	tmp = box->map->solid_segs;
 	while (tmp)
 	{
 		if (tmp->next == seg)
@@ -114,12 +186,22 @@ void	delete_seg(t_box *box, t_solid_seg *seg, int m)
 	}
 }
 
-void	print_solid_segs(t_box *box, int m)
+/**
+ * print_solid_segs()
+ * ------------------
+ *
+ * Prints all segments stored in a current map
+ *
+ * param: t_box *box
+ *
+ * return: 0
+ */
+void	print_solid_segs(t_box *box)
 {
 	t_solid_seg	*tmp;
 	int			i = -1;
 
-	tmp = box->WAD.maps[m].solid_segs;
+	tmp = box->map->solid_segs;
 	while (tmp)
 	{
 		printf("[%i] %i, %i\n", ++i, tmp->x_start, tmp->x_end);
@@ -128,77 +210,64 @@ void	print_solid_segs(t_box *box, int m)
 	printf("\n");
 }
 
-void	clip_wall(t_box *box, t_solid_seg currWall, int m)
+float	distance_to_point(t_box * box, t_vertex *ver)
 {
-	t_solid_seg	*foundWall, *nextWall;
+	// distance = square root ((X2 - X1)^2 + (y2 - y1)^2)
+	return (sqrt(pow(box->map->player.x - ver->x, 2) + pow(box->map->player.y - ver->y, 2)));
+}
 
-	foundWall = box->WAD.maps[m].solid_segs;
+/**
+ * init_values()
+ * -------------
+ *
+ * Inits all the values used
+ *
+ * param: t_box *box
+ *
+ * return: 0
+ */
+void	init_values(t_box *box)
+{
+	box->map = &box->WAD.maps[0];
+	box->map->solid_segs = NULL;
+	add_solid_seg_after(box, new_solid_seg(SCREENWIDTH, INT_MAX, 0), NULL);
+	add_solid_seg_after(box, new_solid_seg(INT_MIN, -1, 0), NULL);
 
-	while (foundWall->next && foundWall->x_end < currWall.x_start - 1)
-		foundWall = foundWall->next;
-	// printf("%i, %i\n", currWall.x_start, currWall.x_end);
-	if (currWall.x_start < foundWall->x_start)
-	{
-		// printf("TEST\n");
-		if (currWall.x_end < foundWall->x_start - 1)
-		{
-			draw_rect(box, (t_rect){currWall.x_start, 0, currWall.x_end - currWall.x_start, 200, 0xFF00FF00}, false);
-			t_solid_seg *p_curr_wall = new_solid_seg(currWall.x_start, currWall.x_end, currWall.color);
-			add_solid_seg_after(box, p_curr_wall, p_curr_wall, 0);
-			return ;
-		}
-		draw_rect(box, (t_rect){currWall.x_start, 0, currWall.x_end - currWall.x_start, 300, 0xFF0000FF}, false);
-		foundWall->x_start = currWall.x_start;
-		return ;
-	}
-	// printf("%i <= %i\n", currWall.x_end, foundWall->x_end);
-	if (currWall.x_end <= foundWall->x_end)
-		return ;
+	box->map->automap_scale_factor = 20;
+	box->map->player.move_speed = 10;
 
-	nextWall = foundWall;
-	// printf("%i >= %i\n", currWall.x_end, nextWall->next->x_start - 1);
-	while (currWall.x_end >= nextWall->next->x_start - 1)
+	box->map->screen_x_to_angle = malloc((SCREENWIDTH + 1) * sizeof(t_angle));
+	t_angle	screen_angle = new_angle(FOV / 2.0f);
+	float	f_step = (float)FOV / (float)(SCREENWIDTH + 1);
+	int i = -1;
+	while (++i <= SCREENWIDTH)
 	{
-		draw_rect(box, (t_rect){currWall.x_start, 0, currWall.x_end - currWall.x_start, 400, 0xFFFF0000}, false);
-		nextWall = nextWall->next;
-		if (currWall.x_end <= nextWall->x_end)
-		{
-			foundWall->x_end = nextWall->x_end;
-			if (nextWall != foundWall)
-			{
-				foundWall = foundWall->next;
-				nextWall = nextWall->next;
-				// printf("Deleting %i, %i\n", foundWall->x_start, foundWall->x_end);
-				delete_seg(box, foundWall, m);
-			}
-			return ;
-		}
-	}
-	// printf("%i, %i | %i, %i\n", nextWall->x_start, nextWall->x_end, foundWall->x_start, foundWall->x_end);
-	draw_rect(box, (t_rect){currWall.x_start, 0, currWall.x_end - currWall.x_start, 500, 0xFFFFFF00}, false);
-	foundWall->x_end = currWall.x_end;
-	if (nextWall != foundWall)
-	{
-		foundWall = foundWall->next;
-		nextWall = nextWall->next;
-		delete_seg(box, foundWall, m);
+		box->map->screen_x_to_angle[i] = screen_angle;
+		screen_angle.angle_val -= f_step;
 	}
 }
 
+/**
+ * init_textures()
+ * ---------------
+ *
+ * Inits all the textures used
+ *
+ * param: t_box *box
+ *
+ * return: 0
+ */
 void	init_textures(t_box *box)
 {
 	int		i;
 
-	box->textures = malloc(100 * sizeof(t_image));
+	box->textures = malloc(MAX_TEXTURES * sizeof(t_image));
 	i = -1;
-	while (++i < 100)
+	while (++i < MAX_TEXTURES)
 		box->textures[i].img = NULL;
 	png_file_to_image(box->mlx, &box->textures[UI_PICKUPS], "textures/ui_pickups.png");
 	split_spritesheet(&box->textures[UI_PICKUPS], 8, 5, 16, 16);
 
-	box->WAD.maps[0].solid_segs = NULL;
-	add_solid_seg_after(box, new_solid_seg(SCREENWIDTH, INT_MAX, 0), NULL, 0);
-	add_solid_seg_after(box, new_solid_seg(INT_MIN, -1, 0), NULL, 0);
 	// clip_wall(box, new_solid_seg(69, 80, 0), 0);
 	// clip_wall(box, new_solid_seg(46, 69, 0), 0);
 	// clip_wall(box, new_solid_seg(195, 210, 0), 0);

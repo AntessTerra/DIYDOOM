@@ -1,4 +1,4 @@
-#include "cub3d.h"
+#include "doom-nukem.h"
 
 void	my_mlx_pyxel_put(t_image *image, int x, int y, int color)
 {
@@ -38,7 +38,6 @@ void	draw_line(t_image *image, int beginX, int beginY, int endX, int endY, int c
 
 void	draw_rect(t_box *box, t_rect rect, bool filled)
 {
-	(void)filled;
 	uint32_t x, y;
 
 	y = rect.y;
@@ -53,19 +52,6 @@ void	draw_rect(t_box *box, t_rect rect, bool filled)
 			}
 			else
 				my_mlx_pyxel_put(&box->image, x, y, rect.color);
-	}
-}
-
-void	fill_screen(t_box *box, uint32_t color)
-{
-	uint32_t x, y;
-
-	y = -1;
-	while (++y < SCREENHEIGHT)
-	{
-		x = -1;
-		while (++x < SCREENWIDTH)
-			my_mlx_pyxel_put(&box->image, x, y, color);
 	}
 }
 

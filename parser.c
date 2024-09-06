@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "cub3d.h"
+#include "doom-nukem.h"
 
 void	print_WAD(t_box *box)
 {
@@ -141,7 +141,7 @@ int parse_sectors(t_box *box, uint32_t i, uint32_t m)
 	return (0);
 }
 
-int	parse_maps(t_box *box)
+static int	parse_maps(t_box *box)
 {
 	uint32_t	i, m;
 
@@ -167,16 +167,20 @@ int	parse_maps(t_box *box)
 	return (0);
 }
 
+/*
+	parser
+
+	Creates a new mlx_image_alpha and sets its variabasdles
+*/
 int	parser(t_box *box)
 {
 	uint32_t	i;
-
-	ft_memset(box->WAD.header.type, 0 , 5);
 
 	box->WAD.fd = open("DOOM.WAD", O_RDONLY);
 	if (!box->WAD.fd)
 		return (printf("ERROR WHILE OPENING WAD FILE\n"), 1);
 
+	ft_memset(box->WAD.header.type, 0 , 5);
 	read(box->WAD.fd, box->WAD.header.type, 4);
 	read(box->WAD.fd, (void *)&box->WAD.header.dir_count, 4);
 	read(box->WAD.fd, (void *)&box->WAD.header.dir_offset, 4);

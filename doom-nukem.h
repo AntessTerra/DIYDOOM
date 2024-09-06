@@ -1,7 +1,7 @@
-	/* ************************************************************************** */
+/* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   cub3d.h                                            :+:      :+:    :+:   */
+/*   doom-nukem.h                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: phelebra <xhelp00@gmail.com>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -11,8 +11,8 @@
 /* ************************************************************************** */
 
 
-#ifndef CUB3D_H
-# define CUB3D_H
+#ifndef DOOM_NUKEM_H
+# define DOOM_NUKEM_H
 
 # include <sys/socket.h>
 # include <sys/ioctl.h>
@@ -46,6 +46,8 @@
 # define LEAF_NODE 0x8000
 # define M_PI 3.14159265358979323846
 # define FOV 90
+# define MAX_TEXTURES 100
+# define N_MAPS 9
 
 typedef struct s_image
 {
@@ -105,6 +107,7 @@ typedef struct s_player
 {
 	int			x;
 	int			y;
+	int			move_speed;
 	t_angle		angle;
 }				t_player;
 
@@ -196,28 +199,29 @@ typedef struct s_solid_seg
 
 typedef struct s_map
 {
-	char		name[5];
-	uint32_t	n_vertexes;
-	t_vertex	*vertexes;
-	uint32_t	n_linedefs;
-	t_linedef	*linedef;
-	uint32_t	n_things;
 	t_thing		*things;
-	uint32_t	n_nodes;
-	t_node		*nodes;
-	uint32_t	n_ssectors;
-	t_ssector	*ssectors;
-	uint32_t	n_segs;
-	t_seg		*segs;
-	uint32_t	n_sidedefs;
+	t_linedef	*linedef;
 	t_sidedef	*sidedefs;
-	uint32_t	n_sectors;
+	t_vertex	*vertexes;
+	t_seg		*segs;
+	t_ssector	*ssectors;
+	t_node		*nodes;
 	t_sector	*sectors;
+	uint32_t	n_vertexes;
+	uint32_t	n_linedefs;
+	uint32_t	n_things;
+	uint32_t	n_nodes;
+	uint32_t	n_ssectors;
+	uint32_t	n_segs;
+	uint32_t	n_sidedefs;
+	uint32_t	n_sectors;
 	t_player	player;
+	char		name[5];
 	int			min_x, max_x;
 	int			min_y, max_y;
 	int			automap_scale_factor;
 	t_solid_seg	*solid_segs;
+	t_angle		*screen_x_to_angle;
 }				t_map;
 
 typedef struct s_WAD
@@ -246,6 +250,7 @@ typedef struct s_box
 	t_image			minimap;
 	t_image			*textures;
 	t_WAD			WAD;
+	t_map			*map;
 }				t_box;
 
 //Hook.c
@@ -261,11 +266,13 @@ int			parser(t_box *box);
 
 //Values.c
 void		init_textures(t_box *box);
+void		init_values(t_box *box);
 t_solid_seg	*new_solid_seg(int start, int end, int color);
-void		add_solid_seg_after(t_box *box, t_solid_seg *what, t_solid_seg *where, int m);
-void		free_solid_segs(t_box *box, int m);
-void		print_solid_segs(t_box *box, int m);
-void		clip_wall(t_box *box, t_solid_seg currWall, int m);
+void		add_solid_seg_after(t_box *box, t_solid_seg *what, t_solid_seg *where);
+void		delete_seg(t_box *box, t_solid_seg *seg);
+void		free_solid_segs(t_box *box);
+void		print_solid_segs(t_box *box);
+float		distance_to_point(t_box * box, t_vertex *ver);
 
 //Image.c
 void		my_mlx_put_image_to_window(t_box *box, t_image *img, int x, int y, int id);
@@ -286,6 +293,7 @@ void		render_fov(t_box *box);
 //Angles.c
 void		normalize_360(float *angle);
 bool		clip_vertexes_in_FOV(t_box *box, t_vertex v1, t_vertex v2);
+t_angle		new_angle(float angle);
 int			angle_to_screen(t_angle angle);
 t_angle		angle_to_vortex(t_box *box, t_vertex vortex);
 

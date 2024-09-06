@@ -1,4 +1,4 @@
-#include "cub3d.h"
+#include "doom-nukem.h"
 
 void	normalize_360(float *angle)
 {
