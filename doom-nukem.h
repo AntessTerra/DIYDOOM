@@ -272,7 +272,6 @@ void		add_solid_seg_after(t_box *box, t_solid_seg *what, t_solid_seg *where);
 void		delete_seg(t_box *box, t_solid_seg *seg);
 void		free_solid_segs(t_box *box);
 void		print_solid_segs(t_box *box);
-float		distance_to_point(t_box * box, t_vertex *ver);
 
 //Image.c
 void		my_mlx_put_image_to_window(t_box *box, t_image *img, int x, int y, int id);
@@ -283,16 +282,14 @@ t_image		*new_image(void *mlx, t_image *img, int width, int height);
 t_image		*img_resize(void *mlx_ptr, t_image *src_img, float n_times_bigger);
 void		png_file_to_image(void *mlx, t_image *image, char *file);
 void		split_spritesheet(t_image *image, int n_col, int n_row, int one_x, int one_y);
-void		update_screen(t_box *box);
 
 //Casting.c
+int			remap_x_to_screen(t_box *box, int x);
+int			remap_y_to_screen(t_box *box, int y);
 void		render_bsp_nodes(t_box *box, int node_id);
-void		draw_automap(t_box *box);
-void		render_fov(t_box *box);
 
 //Angles.c
 void		normalize_360(float *angle);
-bool		clip_vertexes_in_FOV(t_box *box, t_vertex v1, t_vertex v2);
 t_angle		new_angle(float angle);
 int			angle_to_screen(t_angle angle);
 t_angle		angle_to_vortex(t_box *box, t_vertex vortex);

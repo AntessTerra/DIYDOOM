@@ -23,7 +23,7 @@
  *
  * return: t_solid_seg *
  */
-t_solid_seg	*sorted_insert(t_solid_seg *node, t_solid_seg *sorted)
+static t_solid_seg	*sorted_insert(t_solid_seg *node, t_solid_seg *sorted)
 {
 	if (sorted == NULL || sorted->x_start >= node->x_start)
 	{
@@ -52,7 +52,7 @@ t_solid_seg	*sorted_insert(t_solid_seg *node, t_solid_seg *sorted)
  *
  * return: 0
  */
-void	insertion_sort(t_box *box)
+static void	insertion_sort(t_box *box)
 {
 	t_solid_seg	*curr, *next, *sorted;
 	sorted = NULL;
@@ -67,30 +67,6 @@ void	insertion_sort(t_box *box)
 		curr = next;
 	}
 	box->map->solid_segs = sorted;
-}
-
-/**
- * new_solid_seg()
- * ---------------
- *
- * Creates a new solid segment
- *
- * param: int start
- * param: int end
- * param: int color
- *
- * return: t_solid_seg *
- */
-t_solid_seg	*new_solid_seg(int start, int end, int color)
-{
-	t_solid_seg	*seg;
-
-	seg = malloc(sizeof(t_solid_seg));
-	seg->x_start = start;
-	seg->x_end = end;
-	seg->color = color;
-	seg->next = NULL;
-	return (seg);
 }
 
 /**
@@ -128,6 +104,30 @@ void	add_solid_seg_after(t_box *box, t_solid_seg *what, t_solid_seg *where)
 	}
 	curr->next = what;
 	insertion_sort(box);
+}
+
+/**
+ * new_solid_seg()
+ * ---------------
+ *
+ * Creates a new solid segment
+ *
+ * param: int start
+ * param: int end
+ * param: int color
+ *
+ * return: t_solid_seg *
+ */
+t_solid_seg	*new_solid_seg(int start, int end, int color)
+{
+	t_solid_seg	*seg;
+
+	seg = malloc(sizeof(t_solid_seg));
+	seg->x_start = start;
+	seg->x_end = end;
+	seg->color = color;
+	seg->next = NULL;
+	return (seg);
 }
 
 /**
@@ -210,12 +210,6 @@ void	print_solid_segs(t_box *box)
 	printf("\n");
 }
 
-float	distance_to_point(t_box * box, t_vertex *ver)
-{
-	// distance = square root ((X2 - X1)^2 + (y2 - y1)^2)
-	return (sqrt(pow(box->map->player.x - ver->x, 2) + pow(box->map->player.y - ver->y, 2)));
-}
-
 /**
  * init_values()
  * -------------
@@ -276,7 +270,7 @@ void	init_textures(t_box *box)
 	// clip_wall(box, new_solid_seg(76, 107, 0), 0);
 	// clip_wall(box, new_solid_seg(0, 42, 0), 0);
 	// print_solid_segs(box, 0);
-	// delete_seg(box, box->WAD.maps[0].solid_segs->next, 0);
+	// delete_seg(box, box->wad.maps[0].solid_segs->next, 0);
 	// print_solid_segs(box, 0);
 }
 

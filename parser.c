@@ -42,7 +42,7 @@ void	print_WAD(t_box *box)
 	// }
 }
 
-int find_min_max_vertexes(t_box *box, uint32_t m)
+static int	find_min_max_vertexes(t_box *box, uint32_t m)
 {
 	uint32_t	v;
 
@@ -65,7 +65,7 @@ int find_min_max_vertexes(t_box *box, uint32_t m)
 	return (0);
 }
 
-int	parse_vertexes(t_box *box, uint32_t i, uint32_t m)
+static int	parse_vertexes(t_box *box, uint32_t i, uint32_t m)
 {
 	box->WAD.maps[m].n_vertexes = box->WAD.dirs[i].lump_size / sizeof(struct s_vertex);
 	box->WAD.maps[m].vertexes = malloc(box->WAD.dirs[i].lump_size);
@@ -75,7 +75,7 @@ int	parse_vertexes(t_box *box, uint32_t i, uint32_t m)
 	return (0);
 }
 
-int	parse_things(t_box *box, uint32_t i, uint32_t m)
+static int	parse_things(t_box *box, uint32_t i, uint32_t m)
 {
 	box->WAD.maps[m].n_things = box->WAD.dirs[i].lump_size / sizeof(struct s_thing);
 	box->WAD.maps[m].things = malloc(box->WAD.dirs[i].lump_size);
@@ -87,7 +87,7 @@ int	parse_things(t_box *box, uint32_t i, uint32_t m)
 	return (0);
 }
 
-int	parse_linedefs(t_box *box, uint32_t i, uint16_t m)
+static int	parse_linedefs(t_box *box, uint32_t i, uint16_t m)
 {
 	box->WAD.maps[m].n_linedefs = box->WAD.dirs[i].lump_size / sizeof(struct s_linedef);
 	box->WAD.maps[m].linedef = malloc(box->WAD.dirs[i].lump_size);
@@ -96,7 +96,7 @@ int	parse_linedefs(t_box *box, uint32_t i, uint16_t m)
 	return (0);
 }
 
-int	parse_nodes(t_box *box, uint32_t i, uint32_t m)
+static int	parse_nodes(t_box *box, uint32_t i, uint32_t m)
 {
 	box->WAD.maps[m].n_nodes = box->WAD.dirs[i].lump_size / sizeof(struct s_node);
 	box->WAD.maps[m].nodes = malloc(box->WAD.dirs[i].lump_size);
@@ -105,7 +105,7 @@ int	parse_nodes(t_box *box, uint32_t i, uint32_t m)
 	return (0);
 }
 
-int parse_segs(t_box *box, uint32_t i, uint32_t m)
+static int	parse_segs(t_box *box, uint32_t i, uint32_t m)
 {
 	box->WAD.maps[m].n_segs = box->WAD.dirs[i].lump_size / sizeof(struct s_seg);
 	box->WAD.maps[m].segs = malloc(box->WAD.dirs[i].lump_size);
@@ -114,7 +114,7 @@ int parse_segs(t_box *box, uint32_t i, uint32_t m)
 	return (0);
 }
 
-int	parse_ssectors(t_box *box, uint32_t i, uint32_t m)
+static int	parse_ssectors(t_box *box, uint32_t i, uint32_t m)
 {
 	box->WAD.maps[m].n_ssectors = box->WAD.dirs[i].lump_size / sizeof(struct s_ssector);
 	box->WAD.maps[m].ssectors = malloc(box->WAD.dirs[i].lump_size);
@@ -123,7 +123,7 @@ int	parse_ssectors(t_box *box, uint32_t i, uint32_t m)
 	return (0);
 }
 
-int	parse_sidedefs(t_box *box, uint32_t i, uint32_t m)
+static int	parse_sidedefs(t_box *box, uint32_t i, uint32_t m)
 {
 	box->WAD.maps[m].n_sidedefs = box->WAD.dirs[i].lump_size / sizeof(struct s_sidedef);
 	box->WAD.maps[m].sidedefs = malloc(box->WAD.dirs[i].lump_size);
@@ -132,7 +132,7 @@ int	parse_sidedefs(t_box *box, uint32_t i, uint32_t m)
 	return (0);
 }
 
-int parse_sectors(t_box *box, uint32_t i, uint32_t m)
+static int	parse_sectors(t_box *box, uint32_t i, uint32_t m)
 {
 	box->WAD.maps[m].n_sectors = box->WAD.dirs[i].lump_size / sizeof(struct s_sector);
 	box->WAD.maps[m].sectors = malloc(box->WAD.dirs[i].lump_size);

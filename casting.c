@@ -22,6 +22,13 @@ int	remap_y_to_screen(t_box *box, int y)
 	return (((3500 - (y + (box->map->min_y * -1))) / box->map->automap_scale_factor));
 }
 
+
+// static float	distance_to_point(t_box * box, t_vertex *ver)
+// {
+// 	// distance = square root ((X2 - X1)^2 + (y2 - y1)^2)
+// 	return (sqrt(pow(box->map->player.x - ver->x, 2) + pow(box->map->player.y - ver->y, 2)));
+// }
+
 // static void	draw_clipped_wall(t_box *box, t_seg seg)
 // {
 // 	float	ceiling = seg.
@@ -118,64 +125,41 @@ void	add_wall_in_fov(t_box *box, t_angle v1, t_angle v2, t_seg seg, int color)
 	// (void)color;
 }
 
-void	update_screen(t_box *box)
+static bool	clip_vertexes_in_FOV(t_box *box, t_vertex v1, t_vertex v2)
 {
-	free_solid_segs(box);
-	add_solid_seg_after(box, new_solid_seg(SCREENWIDTH, INT_MAX, 0), NULL);
-	add_solid_seg_after(box, new_solid_seg(INT_MIN, -1, 0), NULL);
-	render_fov(box);
-	draw_automap(box);
-	render_bsp_nodes(box, box->WAD.maps[0].n_nodes - 1);
-	my_mlx_put_image_to_window(box, &box->image, 0, 0, -1);
+	t_angle	v1_angle = angle_to_vortex(box, v1);
+	t_angle	v2_angle = angle_to_vortex(box, v2);
 
-	my_mlx_put_image_to_window(box, &box->minimap, SCREENWIDTH * 0.75, 0, -1);
+	t_angle	v1_to_v2 = new_angle(v1_angle.angle_val - v2_angle.angle_val);
 
-	//Draw player icon on location
-	my_mlx_put_image_to_window(box, &box->textures[UI_PICKUPS],
-		(remap_x_to_screen(box, box->map->player.x) - 8) + SCREENWIDTH * 0.75,
-		remap_y_to_screen(box, box->map->player.y) - 8,
-		27);
-}
+	if (v1_to_v2.angle_val >= 180)
+		return (false);
 
-void	render_fov(t_box *box)
-{
-	uint32_t x, y;
+	v1_angle.angle_val -= box->WAD.maps[0].player.angle.angle_val;
+	v2_angle.angle_val -= box->WAD.maps[0].player.angle.angle_val;
 
-	y = -1;
-	while (++y < SCREENHEIGHT)
+	t_angle	half_FOV = new_angle(FOV / 2);
+
+	t_angle	v1_moved = new_angle(v1_angle.angle_val + half_FOV.angle_val);
+
+	if (v1_moved.angle_val > FOV)
 	{
-		x = -1;
-		while (++x < SCREENWIDTH)
-			my_mlx_pyxel_put(&box->image, x, y, 0xFF3e403f);
-	}
-}
+		t_angle	v1_moved_angle = new_angle(v1_moved.angle_val - FOV);
 
-void	draw_automap(t_box *box)
-{
-	uint32_t	i, y, x;
-	t_vertex	start, end;
-
-	y = -1;
-	while (++y < SCREENHEIGHT / 4)
-	{
-		x = -1;
-		while (++x < SCREENWIDTH / 4)
-			my_mlx_pyxel_put(&box->minimap, x, y, 0x4D000000);
+		if (v1_moved_angle.angle_val >= v1_to_v2.angle_val)
+			return (false);
+		v1_angle.angle_val = half_FOV.angle_val;
 	}
 
-	i = -1;
-	while (++i < box->map->n_linedefs)
-	{
-		start = box->map->vertexes[box->map->linedef[i].start_vertex];
-		end = box->map->vertexes[box->map->linedef[i].end_vertex];
+	t_angle	v2_moved = new_angle(half_FOV.angle_val - v2_angle.angle_val);
 
-		draw_line(&box->minimap,
-			remap_x_to_screen(box, start.x),
-			remap_y_to_screen(box, start.y),
-			remap_x_to_screen(box, end.x),
-			remap_y_to_screen(box, end.y),
-			0xFFFFFF);
-	}
+	if (v2_moved.angle_val > FOV)
+		v2_angle.angle_val -= half_FOV.angle_val;
+
+	v1_angle.angle_val += 90;
+	v2_angle.angle_val += 90;
+
+	return (true);
 }
 
 static void	render_subsector(t_box *box, int subsector_id)

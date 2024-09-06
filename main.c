@@ -12,6 +12,66 @@
 
 #include "doom-nukem.h"
 
+static void	render_fov(t_box *box)
+{
+	uint32_t x, y;
+
+	y = -1;
+	while (++y < SCREENHEIGHT)
+	{
+		x = -1;
+		while (++x < SCREENWIDTH)
+			my_mlx_pyxel_put(&box->image, x, y, 0xFF3e403f);
+	}
+}
+
+static void	draw_automap(t_box *box)
+{
+	uint32_t	i, y, x;
+	t_vertex	start, end;
+
+	y = -1;
+	while (++y < SCREENHEIGHT / 4)
+	{
+		x = -1;
+		while (++x < SCREENWIDTH / 4)
+			my_mlx_pyxel_put(&box->minimap, x, y, 0x4D000000);
+	}
+
+	i = -1;
+	while (++i < box->map->n_linedefs)
+	{
+		start = box->map->vertexes[box->map->linedef[i].start_vertex];
+		end = box->map->vertexes[box->map->linedef[i].end_vertex];
+
+		draw_line(&box->minimap,
+			remap_x_to_screen(box, start.x),
+			remap_y_to_screen(box, start.y),
+			remap_x_to_screen(box, end.x),
+			remap_y_to_screen(box, end.y),
+			0xFFFFFF);
+	}
+}
+
+static void	update_screen(t_box *box)
+{
+	free_solid_segs(box);
+	add_solid_seg_after(box, new_solid_seg(SCREENWIDTH, INT_MAX, 0), NULL);
+	add_solid_seg_after(box, new_solid_seg(INT_MIN, -1, 0), NULL);
+	render_fov(box);
+	draw_automap(box);
+	render_bsp_nodes(box, box->WAD.maps[0].n_nodes - 1);
+	my_mlx_put_image_to_window(box, &box->image, 0, 0, -1);
+
+	my_mlx_put_image_to_window(box, &box->minimap, SCREENWIDTH * 0.75, 0, -1);
+
+	//Draw player icon on location
+	my_mlx_put_image_to_window(box, &box->textures[UI_PICKUPS],
+		(remap_x_to_screen(box, box->map->player.x) - 8) + SCREENWIDTH * 0.75,
+		remap_y_to_screen(box, box->map->player.y) - 8,
+		27);
+}
+
 /** timer()
  * 	-------
  *

@@ -26,43 +26,6 @@ t_angle	angle_to_vortex(t_box *box, t_vertex vortex)
 	return (angle);
 }
 
-bool	clip_vertexes_in_FOV(t_box *box, t_vertex v1, t_vertex v2)
-{
-	t_angle	v1_angle = angle_to_vortex(box, v1);
-	t_angle	v2_angle = angle_to_vortex(box, v2);
-
-	t_angle	v1_to_v2 = new_angle(v1_angle.angle_val - v2_angle.angle_val);
-
-	if (v1_to_v2.angle_val >= 180)
-		return (false);
-
-	v1_angle.angle_val -= box->WAD.maps[0].player.angle.angle_val;
-	v2_angle.angle_val -= box->WAD.maps[0].player.angle.angle_val;
-
-	t_angle	half_FOV = new_angle(FOV / 2);
-
-	t_angle	v1_moved = new_angle(v1_angle.angle_val + half_FOV.angle_val);
-
-	if (v1_moved.angle_val > FOV)
-	{
-		t_angle	v1_moved_angle = new_angle(v1_moved.angle_val - FOV);
-
-		if (v1_moved_angle.angle_val >= v1_to_v2.angle_val)
-			return (false);
-		v1_angle.angle_val = half_FOV.angle_val;
-	}
-
-	t_angle	v2_moved = new_angle(half_FOV.angle_val - v2_angle.angle_val);
-
-	if (v2_moved.angle_val > FOV)
-		v2_angle.angle_val -= half_FOV.angle_val;
-
-	v1_angle.angle_val += 90;
-	v2_angle.angle_val += 90;
-
-	return (true);
-}
-
 int	angle_to_screen(t_angle angle)
 {
 	int	ix = 0;
