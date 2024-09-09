@@ -15,6 +15,8 @@
 
 # include <stdint.h>
 
+# define MAX_TEXTURE_COLORS 100
+
 // STRUCTURES TO STORE RAW WAD DATA
 
 typedef struct s_WAD_linedef
@@ -115,10 +117,17 @@ typedef struct s_angle
 	float	angle_val;
 }				t_angle;
 
+typedef struct s_texture_color
+{
+	int		color;
+	char	name[8];
+}				t_texture_color;
+
 typedef struct s_player
 {
 	int			x;
 	int			y;
+	int			z;
 	int			move_speed;
 	t_angle		angle;
 }				t_player;
@@ -165,7 +174,6 @@ typedef struct s_solid_seg
 {
 	int					x_start;
 	int					x_end;
-	int					color;
 	struct s_solid_seg	*next;
 }				t_solid_seg;
 
@@ -202,6 +210,7 @@ typedef struct s_map
 	int				automap_scale_factor;
 	t_solid_seg		*solid_segs;
 	t_angle			*screen_x_to_angle;
+	t_texture_color	texture_to_color[MAX_TEXTURE_COLORS];
 }				t_map;
 
 #endif

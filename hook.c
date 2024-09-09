@@ -175,23 +175,23 @@ int	key_release(int key, t_box *box)
 	}
 	else if (key == 'w')
 	{
-		box->map->player.x += cos(box->map->player.angle.angle_val) * box->map->player.move_speed;
-		box->map->player.y += sin(box->map->player.angle.angle_val) * box->map->player.move_speed;
+		box->map->player.x += get_cos_value(box->map->player.angle) * box->map->player.move_speed;
+		box->map->player.y += get_sin_value(box->map->player.angle) * box->map->player.move_speed;
 	}
 	else if (key == 's')
 	{
-		box->map->player.x -= cos(box->map->player.angle.angle_val) * box->map->player.move_speed;
-		box->map->player.y -= sin(box->map->player.angle.angle_val) * box->map->player.move_speed;
+		box->map->player.x -= get_cos_value(box->map->player.angle) * box->map->player.move_speed;
+		box->map->player.y -= get_sin_value(box->map->player.angle) * box->map->player.move_speed;
 	}
 	else if (key == 'a')
 	{
-		box->map->player.x += cos(box->map->player.angle.angle_val) * box->map->player.move_speed;
-		box->map->player.y -= sin(box->map->player.angle.angle_val) * box->map->player.move_speed;
+		box->map->player.x -= get_sin_value(box->map->player.angle) * box->map->player.move_speed;
+		box->map->player.y += get_cos_value(box->map->player.angle) * box->map->player.move_speed;
 	}
 	else if (key == 'd')
 	{
-		box->map->player.x -= cos(box->map->player.angle.angle_val) * box->map->player.move_speed;
-		box->map->player.y += sin(box->map->player.angle.angle_val) * box->map->player.move_speed;
+		box->map->player.x += get_sin_value(box->map->player.angle) * box->map->player.move_speed;
+		box->map->player.y -= get_cos_value(box->map->player.angle) * box->map->player.move_speed;
 	}
 	// else if (key == 65453 && box->WAD.m > 0) // - numpad key
 	// 		box->WAD.m--;

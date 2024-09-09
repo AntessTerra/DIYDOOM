@@ -118,14 +118,13 @@ void	add_solid_seg_after(t_box *box, t_solid_seg *what, t_solid_seg *where)
  *
  * return: t_solid_seg *
  */
-t_solid_seg	*new_solid_seg(int start, int end, int color)
+t_solid_seg	*new_solid_seg(int start, int end)
 {
 	t_solid_seg	*seg;
 
 	seg = malloc(sizeof(t_solid_seg));
 	seg->x_start = start;
 	seg->x_end = end;
-	seg->color = color;
 	seg->next = NULL;
 	return (seg);
 }
@@ -210,6 +209,26 @@ void	print_solid_segs(t_box *box)
 	printf("\n");
 }
 
+int	get_wall_color(t_box *box, char *str)
+{
+	uint32_t	i, added;
+
+	i = -1;
+	added = 0;
+	while (++i < MAX_TEXTURE_COLORS && box->map->texture_to_color[i].name[0] && !added)
+		if (!ft_strncmp(box->map->texture_to_color[i].name, str, 8))
+			added = 1;
+	if (i < MAX_TEXTURE_COLORS && !added)
+	{
+		box->map->texture_to_color[i].color = 0xFF << 24 | rand() % 255 << 16 | rand() % 255 << 8 | rand() % 255;
+		ft_strlcpy(box->map->texture_to_color[i].name, str, 8);
+		return (box->map->texture_to_color[i].color);
+	}
+	if (added)
+		return (box->map->texture_to_color[i].color);
+	return (0);
+}
+
 /**
  * init_values()
  * -------------
@@ -224,8 +243,8 @@ void	init_values(t_box *box)
 {
 	box->map = &box->WAD.maps[0];
 	box->map->solid_segs = NULL;
-	add_solid_seg_after(box, new_solid_seg(SCREENWIDTH, INT_MAX, 0), NULL);
-	add_solid_seg_after(box, new_solid_seg(INT_MIN, -1, 0), NULL);
+	add_solid_seg_after(box, new_solid_seg(SCREENWIDTH, INT_MAX), NULL);
+	add_solid_seg_after(box, new_solid_seg(INT_MIN, -1), NULL);
 
 	box->map->automap_scale_factor = 20;
 	box->map->player.move_speed = 10;

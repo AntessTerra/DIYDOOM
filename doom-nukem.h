@@ -122,11 +122,12 @@ int			parser(t_box *box);
 //Values.c
 void		init_textures(t_box *box);
 void		init_values(t_box *box);
-t_solid_seg	*new_solid_seg(int start, int end, int color);
+t_solid_seg	*new_solid_seg(int start, int end);
 void		add_solid_seg_after(t_box *box, t_solid_seg *what, t_solid_seg *where);
 void		delete_seg(t_box *box, t_solid_seg *seg);
 void		free_solid_segs(t_box *box);
 void		print_solid_segs(t_box *box);
+int			get_wall_color(t_box *box, char *str);
 
 //Image.c
 void		my_mlx_put_image_to_window(t_box *box, t_image *img, int x, int y, int id);
@@ -145,6 +146,10 @@ void		render_bsp_nodes(t_box *box, int node_id);
 
 //Angles.c
 void		normalize_360(float *angle);
+float		get_cos_value(t_angle angle);
+float		get_sin_value(t_angle angle);
+float		get_tan_value(t_angle angle);
+float		get_signed_value(t_angle angle);
 t_angle		new_angle(float angle);
 int			angle_to_screen(t_angle angle);
 t_angle		angle_to_vortex(t_box *box, t_vertex vortex);

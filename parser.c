@@ -81,8 +81,10 @@ static int	parse_things(t_box *box, uint32_t i, uint32_t m)
 	box->WAD.maps[m].WAD_things = malloc(box->WAD.dirs[i].lump_size);
 	lseek(box->WAD.fd, box->WAD.dirs[i].lump_offset, SEEK_SET);
 	read(box->WAD.fd, (void *)&box->WAD.maps[m].WAD_things[0], box->WAD.dirs[i].lump_size);
+	// Init player
 	box->WAD.maps[m].player.x = box->WAD.maps[m].WAD_things[0].x;
 	box->WAD.maps[m].player.y = box->WAD.maps[m].WAD_things[0].y;
+	box->WAD.maps[m].player.z = 41;
 	box->WAD.maps[m].player.angle.angle_val = box->WAD.maps[m].WAD_things[0].angle;
 	return (0);
 }
@@ -147,6 +149,12 @@ static int	build_sidedefs(t_box *box, uint32_t m)
 	t_sidedef		*sidedef;
 	t_WAD_sidedef	*WAD_sidedef;
 
+	i = -1;
+	while (++i < MAX_TEXTURE_COLORS)
+	{
+		box->WAD.maps[m].texture_to_color[i].color = 0;
+		ft_memset(box->WAD.maps[m].texture_to_color[i].name, 0, 8);
+	}
 	i = -1;
 	box->WAD.maps[m].sidedefs = malloc(box->WAD.maps[m].n_sidedefs * sizeof(struct s_sidedef));
 	while (++i < box->WAD.maps[m].n_sidedefs)

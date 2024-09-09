@@ -56,8 +56,8 @@ static void	draw_automap(t_box *box)
 static void	update_screen(t_box *box)
 {
 	free_solid_segs(box);
-	add_solid_seg_after(box, new_solid_seg(SCREENWIDTH, INT_MAX, 0), NULL);
-	add_solid_seg_after(box, new_solid_seg(INT_MIN, -1, 0), NULL);
+	add_solid_seg_after(box, new_solid_seg(SCREENWIDTH, INT_MAX), NULL);
+	add_solid_seg_after(box, new_solid_seg(INT_MIN, -1), NULL);
 	render_fov(box);
 	draw_automap(box);
 	render_bsp_nodes(box, box->WAD.maps[0].n_nodes - 1);

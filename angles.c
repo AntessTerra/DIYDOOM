@@ -7,6 +7,28 @@ void	normalize_360(float *angle)
 		*angle += 360;
 }
 
+float	get_cos_value(t_angle angle)
+{
+	return (cosf(angle.angle_val * M_PI / 180.0f));
+}
+
+float	get_sin_value(t_angle angle)
+{
+	return (sinf(angle.angle_val * M_PI / 180.0f));
+}
+
+float	get_tan_value(t_angle angle)
+{
+	return (tanf(angle.angle_val * M_PI / 180.0f));
+}
+
+float	get_signed_value(t_angle angle)
+{
+	if (angle.angle_val > 180)
+		return (angle.angle_val - 360);
+	return (angle.angle_val);
+}
+
 t_angle	new_angle(float angle)
 {
 	t_angle	new;
@@ -34,12 +56,12 @@ int	angle_to_screen(t_angle angle)
 	if (angle.angle_val > 90)
 	{
 		angle.angle_val -= 90;
-		ix = (SCREENWIDTH / 2) - round(tanf(angle.angle_val * M_PI / 180.0f) * (SCREENWIDTH / 2));
+		ix = (SCREENWIDTH / 2) - round(get_tan_value(angle) * (SCREENWIDTH / 2));
 	}
 	else
 	{
 		angle.angle_val = 90 - angle.angle_val;
-		ix = round(tanf(angle.angle_val * M_PI / 180.0f) * (SCREENWIDTH / 2));
+		ix = round(get_tan_value(angle) * (SCREENWIDTH / 2));
 		ix += (SCREENWIDTH / 2);
 	}
 	// printf("%i\n", ix);
