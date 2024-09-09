@@ -42,13 +42,16 @@ int	free_stuff(t_box *box)
 	m = -1;
 	while (++m < 9)
 	{
-		free(box->WAD.maps[m].linedef);
+		free(box->WAD.maps[m].WAD_linedefs);
+		free(box->WAD.maps[m].linedefs);
 		free(box->WAD.maps[m].vertexes);
-		free(box->WAD.maps[m].things);
-		free(box->WAD.maps[m].nodes);
-		free(box->WAD.maps[m].ssectors);
+		free(box->WAD.maps[m].WAD_things);
+		free(box->WAD.maps[m].WAD_nodes);
+		free(box->WAD.maps[m].WAD_ssectors);
+		free(box->WAD.maps[m].WAD_segs);
 		free(box->WAD.maps[m].segs);
-		free(box->WAD.maps[m].sectors);
+		free(box->WAD.maps[m].WAD_sectors);
+		free(box->WAD.maps[m].WAD_sidedefs);
 		free(box->WAD.maps[m].sidedefs);
 	}
 	free_solid_segs(box);

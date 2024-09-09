@@ -164,7 +164,7 @@ static bool	clip_vertexes_in_FOV(t_box *box, t_vertex v1, t_vertex v2)
 
 static void	render_subsector(t_box *box, int subsector_id)
 {
-	t_ssector	subsector = box->WAD.maps[0].ssectors[subsector_id];
+	t_WAD_ssector	subsector = box->WAD.maps[0].WAD_ssectors[subsector_id];
 	t_seg		seg;
 	t_vertex	start, end;
 
@@ -173,19 +173,19 @@ static void	render_subsector(t_box *box, int subsector_id)
 	while (++i < subsector.seg_count)
 	{
 		seg = box->map->segs[subsector.first_seg_id + i];
-		start = box->map->vertexes[seg.start_vertex_id];
-		end = box->map->vertexes[seg.end_vertex_id];
+		start = *seg.p_start_vertex;
+		end = *seg.p_end_vertex;
 
 		if (clip_vertexes_in_FOV(box, start, end))
 		{
-			int *color = (int*)(box->map->sidedefs[box->map->linedef[seg.linedef_id].right_sidedef].lower_texture);
+			int *color = (int*)((*seg.p_linedef).p_right_sidedef->lower_texture);
 			draw_line(&box->minimap,
 				remap_x_to_screen(box, start.x),
 				remap_y_to_screen(box, start.y),
 				remap_x_to_screen(box, end.x),
 				remap_y_to_screen(box, end.y),
 				*color);
-			if (box->map->linedef[seg.linedef_id].left_sidedef == 0xFFFF)
+			if (!(*seg.p_linedef).p_left_sidedef)
 				add_wall_in_fov(box, angle_to_vortex(box, start), angle_to_vortex(box, end), seg, *color);
 		}
 	}
@@ -193,10 +193,10 @@ static void	render_subsector(t_box *box, int subsector_id)
 
 static bool	is_point_on_left_side(t_box *box, int x, int y, int node_id)
 {
-	int dx = x - box->map->nodes[node_id].partition_x;
-	int dy = y - box->map->nodes[node_id].partition_y;
+	int dx = x - box->map->WAD_nodes[node_id].partition_x;
+	int dy = y - box->map->WAD_nodes[node_id].partition_y;
 
-	return (((dx * box->map->nodes[node_id].change_partition_y) - (dy * box->map->nodes[node_id].change_partition_x)) <= 0);
+	return (((dx * box->map->WAD_nodes[node_id].change_partition_y) - (dy * box->map->WAD_nodes[node_id].change_partition_x)) <= 0);
 }
 
 void	render_bsp_nodes(t_box *box, int node_id)
@@ -210,13 +210,13 @@ void	render_bsp_nodes(t_box *box, int node_id)
 
 	if (is_point_on_left_side(box, box->map->player.x, box->map->player.y, node_id))
 	{
-		render_bsp_nodes(box, box->map->nodes[node_id].left_child_id);
-		render_bsp_nodes(box, box->map->nodes[node_id].right_child_id);
+		render_bsp_nodes(box, box->map->WAD_nodes[node_id].left_child_id);
+		render_bsp_nodes(box, box->map->WAD_nodes[node_id].right_child_id);
 	}
 	else
 	{
-		render_bsp_nodes(box, box->map->nodes[node_id].right_child_id);
-		render_bsp_nodes(box, box->map->nodes[node_id].left_child_id);
+		render_bsp_nodes(box, box->map->WAD_nodes[node_id].right_child_id);
+		render_bsp_nodes(box, box->map->WAD_nodes[node_id].left_child_id);
 	}
 }
 

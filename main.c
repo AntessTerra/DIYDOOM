@@ -41,8 +41,8 @@ static void	draw_automap(t_box *box)
 	i = -1;
 	while (++i < box->map->n_linedefs)
 	{
-		start = box->map->vertexes[box->map->linedef[i].start_vertex];
-		end = box->map->vertexes[box->map->linedef[i].end_vertex];
+		start = *box->map->linedefs[i].p_start_vertex;
+		end = *box->map->linedefs[i].p_end_vertex;
 
 		draw_line(&box->minimap,
 			remap_x_to_screen(box, start.x),

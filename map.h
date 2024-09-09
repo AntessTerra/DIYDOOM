@@ -15,35 +15,18 @@
 
 # include <stdint.h>
 
-typedef struct s_angle
-{
-	float	angle_val;
-}				t_angle;
+// STRUCTURES TO STORE RAW WAD DATA
 
-typedef struct s_player
+typedef struct s_WAD_linedef
 {
-	int			x;
-	int			y;
-	int			move_speed;
-	t_angle		angle;
-}				t_player;
-
-typedef struct s_vertex
-{
-	int16_t		x;
-	int16_t		y;
-}				t_vertex;
-
-typedef struct s_linedef
-{
-	uint16_t	start_vertex;
-	uint16_t	end_vertex;
+	uint16_t	start_vertex_id;
+	uint16_t	end_vertex_id;
 	uint16_t	flags;
 	uint16_t	line_type;
 	uint16_t	sector_tag;
 	uint16_t	right_sidedef;
 	uint16_t	left_sidedef;
-}				t_linedef;
+}				t_WAD_linedef;
 
 enum e_linedef_flags
 {
@@ -58,16 +41,16 @@ enum e_linedef_flags
 	DRAW			= 128
 };
 
-typedef struct s_thing
+typedef struct s_WAD_thing
 {
 	int16_t		x;
 	int16_t		y;
 	uint16_t	angle;
 	uint16_t	type;
 	uint16_t	flags;
-}				t_thing;
+}				t_WAD_thing;
 
-typedef struct s_node
+typedef struct s_WAD_node
 {
 	int16_t		partition_x;
 	int16_t		partition_y;
@@ -86,15 +69,15 @@ typedef struct s_node
 
 	uint16_t	right_child_id;
 	uint16_t	left_child_id;
-}				t_node;
+}				t_WAD_node;
 
-typedef struct s_ssector
+typedef struct s_WAD_ssector
 {
 	uint16_t	seg_count;
 	uint16_t	first_seg_id;
-}				t_ssector;
+}				t_WAD_ssector;
 
-typedef struct s_seg
+typedef struct s_WAD_seg
 {
 	uint16_t	start_vertex_id;
 	uint16_t	end_vertex_id;
@@ -102,9 +85,9 @@ typedef struct s_seg
 	uint16_t	linedef_id;
 	uint16_t	direction;
 	uint16_t	offset;
-}				t_seg;
+}				t_WAD_seg;
 
-typedef struct s_sidedef
+typedef struct s_WAD_sidedef
 {
 	int16_t		x_offset;
 	int16_t		y_offset;
@@ -112,9 +95,9 @@ typedef struct s_sidedef
 	char		lower_texture[8];
 	char		middle_texture[8];
 	uint16_t	sector_id;
-}				t_sidedef;
+}				t_WAD_sidedef;
 
-typedef struct s_sector
+typedef struct s_WAD_sector
 {
 	int16_t		floor_height;
 	int16_t		ceiling_height;
@@ -123,7 +106,60 @@ typedef struct s_sector
 	uint16_t	light_level;
 	uint16_t	type;
 	uint16_t	tag;
-}				t_sector;
+}				t_WAD_sector;
+
+// OTHER HELPFULL STUCTURES
+
+typedef struct s_angle
+{
+	float	angle_val;
+}				t_angle;
+
+typedef struct s_player
+{
+	int			x;
+	int			y;
+	int			move_speed;
+	t_angle		angle;
+}				t_player;
+
+typedef struct s_vertex
+{
+	int16_t		x;
+	int16_t		y;
+}				t_vertex;
+typedef struct s_sidedef
+{
+	int16_t			x_offset;
+	int16_t			y_offset;
+	char			upper_texture[8];
+	char			lower_texture[8];
+	char			middle_texture[8];
+	t_WAD_sector	*p_sector;
+}				t_sidedef;
+
+typedef struct s_linedef
+{
+	t_vertex		*p_start_vertex;
+	t_vertex		*p_end_vertex;
+	uint16_t		flags;
+	uint16_t		line_type;
+	uint16_t		sector_tag;
+	t_sidedef		*p_right_sidedef;
+	t_sidedef		*p_left_sidedef;
+}				t_linedef;
+
+typedef struct s_seg
+{
+	t_vertex		*p_start_vertex;
+	t_vertex		*p_end_vertex;
+	t_angle			angle;
+	t_linedef		*p_linedef;
+	uint16_t		direction;
+	uint16_t		offset;
+	t_WAD_sector	*p_right_sector;
+	t_WAD_sector	*p_left_sector;
+}				t_seg;
 
 typedef struct s_solid_seg
 {
@@ -135,31 +171,37 @@ typedef struct s_solid_seg
 
 typedef struct s_map
 {
-	t_thing		*things;
-	t_linedef	*linedef;
-	t_sidedef	*sidedefs;
-	t_vertex	*vertexes;
-	t_seg		*segs;
-	t_ssector	*ssectors;
-	t_node		*nodes;
-	t_sector	*sectors;
-	uint32_t	n_things;
-	uint32_t	n_linedefs;
-	uint32_t	n_sidedefs;
-	uint32_t	n_vertexes;
-	uint32_t	n_segs;
-	uint32_t	n_ssectors;
-	uint32_t	n_nodes;
-	uint32_t	n_sectors;
-	t_player	player;
-	char		name[5];
-	int			min_x;
-	int			min_y;
-	int			max_x;
-	int			max_y;
-	int			automap_scale_factor;
-	t_solid_seg	*solid_segs;
-	t_angle		*screen_x_to_angle;
+	t_WAD_thing			*WAD_things;
+	t_WAD_linedef		*WAD_linedefs;
+	t_WAD_sidedef		*WAD_sidedefs;
+	t_vertex			*vertexes;
+	t_WAD_seg			*WAD_segs;
+	t_WAD_ssector		*WAD_ssectors;
+	t_WAD_node			*WAD_nodes;
+	t_WAD_sector		*WAD_sectors;
+
+	t_linedef		*linedefs;
+	t_sidedef		*sidedefs;
+	t_seg			*segs;
+
+	uint32_t		n_things;
+	uint32_t		n_linedefs;
+	uint32_t		n_sidedefs;
+	uint32_t		n_vertexes;
+	uint32_t		n_segs;
+	uint32_t		n_ssectors;
+	uint32_t		n_nodes;
+	uint32_t		n_sectors;
+
+	t_player		player;
+	char			name[5];
+	int				min_x;
+	int				min_y;
+	int				max_x;
+	int				max_y;
+	int				automap_scale_factor;
+	t_solid_seg		*solid_segs;
+	t_angle			*screen_x_to_angle;
 }				t_map;
 
 #endif
