@@ -19,6 +19,22 @@ void	my_mlx_put_image_to_window(t_box *box, t_image *image, int x, int y, int sp
 
 void	draw_line(t_image *image, int beginX, int beginY, int endX, int endY, int color)
 {
+	if (beginX < 0)
+		beginX = 0;
+	if (beginX > SCREENWIDTH)
+		beginX = SCREENWIDTH;
+	if (endX < 0)
+		endX = 0;
+	if (endX > SCREENWIDTH)
+		endX = SCREENWIDTH;
+	if (beginY < 0)
+		beginY = 0;
+	if (beginY > SCREENHEIGHT)
+		beginY = SCREENHEIGHT;
+	if (endY < 0)
+		endY = 0;
+	if (endY > SCREENHEIGHT)
+		endY = SCREENHEIGHT;
 	double deltaX = endX - beginX;
 	double deltaY = endY - beginY;
 	int pixels = sqrt((deltaX * deltaX) + (deltaY * deltaY));
@@ -29,7 +45,7 @@ void	draw_line(t_image *image, int beginX, int beginY, int endX, int endY, int c
 	while (pixels)
 	{
 		// printf("%i | %i\n", (int)pixelX, (int)pixelY);
-		my_mlx_pyxel_put(image, pixelX, pixelY, 0xFF << 24 | color);
+		my_mlx_pyxel_put(image, pixelX, pixelY, color);
 		pixelX += deltaX;
 		pixelY += deltaY;
 		--pixels;

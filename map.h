@@ -125,10 +125,13 @@ typedef struct s_texture_color
 
 typedef struct s_player
 {
-	int			x;
-	int			y;
-	int			z;
-	int			move_speed;
+	double		x;
+	double		y;
+	double		z;
+	double		move_speed;
+	int			rotate;
+	int			move_x;
+	int			move_y;
 	t_angle		angle;
 }				t_player;
 

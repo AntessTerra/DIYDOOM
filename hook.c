@@ -140,8 +140,18 @@ int	mouse_release(int keycode, int x, int y, t_box *box)
  */
 int	key_press(int key, t_box *box)
 {
-	(void) box;
-	(void) key;
+	if (key == 65361 || key == 'q') // left arrow key
+		box->map->player.rotate = 1;
+	else if (key == 65363 || key =='e') // right arrow key
+		box->map->player.rotate = -1;
+	else if (key == 'w')
+		box->map->player.move_x = 1;
+	else if (key == 's')
+		box->map->player.move_x = -1;
+	else if (key == 'a')
+		box->map->player.move_y = 1;
+	else if (key == 'd')
+		box->map->player.move_y = -1;
 	// printf("Key pressed: %i\n", key);
 	return (0);
 }
@@ -160,39 +170,20 @@ int	key_press(int key, t_box *box)
  */
 int	key_release(int key, t_box *box)
 {
-	// (void) box;
 	if (key == 65307) // esc key
 		exit_hook(box);
-	else if (key == 65361) // left arrow key
-	{
-		box->WAD.maps[0].player.angle.angle_val += (0.1875f * 10);
-		normalize_360(&box->WAD.maps[0].player.angle.angle_val);
-	}
-	else if (key == 65363) // right arrow key
-	{
-		box->WAD.maps[0].player.angle.angle_val -= (0.1875f * 10);
-		normalize_360(&box->WAD.maps[0].player.angle.angle_val);
-	}
+	else if (key == 65361 || key == 'q') // left arrow key
+		box->map->player.rotate = 0;
+	else if (key == 65363 || key == 'e') // right arrow key
+		box->map->player.rotate = 0;
 	else if (key == 'w')
-	{
-		box->map->player.x += get_cos_value(box->map->player.angle) * box->map->player.move_speed;
-		box->map->player.y += get_sin_value(box->map->player.angle) * box->map->player.move_speed;
-	}
+		box->map->player.move_x = 0;
 	else if (key == 's')
-	{
-		box->map->player.x -= get_cos_value(box->map->player.angle) * box->map->player.move_speed;
-		box->map->player.y -= get_sin_value(box->map->player.angle) * box->map->player.move_speed;
-	}
+		box->map->player.move_x = 0;
 	else if (key == 'a')
-	{
-		box->map->player.x -= get_sin_value(box->map->player.angle) * box->map->player.move_speed;
-		box->map->player.y += get_cos_value(box->map->player.angle) * box->map->player.move_speed;
-	}
+		box->map->player.move_y = 0;
 	else if (key == 'd')
-	{
-		box->map->player.x += get_sin_value(box->map->player.angle) * box->map->player.move_speed;
-		box->map->player.y -= get_cos_value(box->map->player.angle) * box->map->player.move_speed;
-	}
+		box->map->player.move_y = 0;
 	// else if (key == 65453 && box->WAD.m > 0) // - numpad key
 	// 		box->WAD.m--;
 	// else if (key == 65363 && box->WAD.m < N_MAPS) // + numpad key

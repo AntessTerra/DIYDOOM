@@ -70,6 +70,7 @@ static void	update_screen(t_box *box)
 		(remap_x_to_screen(box, box->map->player.x) - 8) + SCREENWIDTH * 0.75,
 		remap_y_to_screen(box, box->map->player.y) - 8,
 		27);
+	// printf("-----------------------------------------------------\n");
 }
 
 /** timer()
@@ -82,6 +83,7 @@ static void	update_screen(t_box *box)
  */
 static int	timer(t_box *box)
 {
+	calc_move(box);
 	update_screen(box);
 	return (0);
 }

@@ -242,12 +242,15 @@ int	get_wall_color(t_box *box, char *str)
 void	init_values(t_box *box)
 {
 	box->map = &box->WAD.maps[0];
+	box->map->player.move_x = 0;
+	box->map->player.move_y = 0;
+	box->map->player.rotate = 0;
 	box->map->solid_segs = NULL;
 	add_solid_seg_after(box, new_solid_seg(SCREENWIDTH, INT_MAX), NULL);
 	add_solid_seg_after(box, new_solid_seg(INT_MIN, -1), NULL);
 
 	box->map->automap_scale_factor = 20;
-	box->map->player.move_speed = 10;
+	box->map->player.move_speed = 0.5;
 
 	box->map->screen_x_to_angle = malloc((SCREENWIDTH + 1) * sizeof(t_angle));
 	t_angle	screen_angle = new_angle(FOV / 2.0f);

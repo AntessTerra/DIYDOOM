@@ -5,6 +5,8 @@ void	normalize_360(float *angle)
 	*angle = fmod(*angle, 360);
 	while (*angle < 0)
 		*angle += 360;
+	while (*angle > 360)
+		*angle -= 360;
 }
 
 float	get_cos_value(t_angle angle)
@@ -40,8 +42,8 @@ t_angle	new_angle(float angle)
 
 t_angle	angle_to_vortex(t_box *box, t_vertex vortex)
 {
-	float Vdx = vortex.x - box->WAD.maps[0].player.x;
-	float Vdy = vortex.y - box->WAD.maps[0].player.y;
+	float Vdx = vortex.x - box->map->player.x;
+	float Vdy = vortex.y - box->map->player.y;
 
 	t_angle angle = new_angle(atan2f(Vdy, Vdx) * 180 / M_PI);
 
@@ -52,17 +54,18 @@ int	angle_to_screen(t_angle angle)
 {
 	int	ix = 0;
 
+	normalize_360(&angle.angle_val);
 	// printf("DEBUG: %f° == ", angle.angle_val);
 	if (angle.angle_val > 90)
 	{
 		angle.angle_val -= 90;
-		ix = (SCREENWIDTH / 2) - round(get_tan_value(angle) * (SCREENWIDTH / 2));
+		ix = ((SCREENWIDTH / 2) / get_tan_value((t_angle){FOV/2})) - roundf(get_tan_value(angle) * (SCREENWIDTH / 2));
 	}
 	else
 	{
 		angle.angle_val = 90 - angle.angle_val;
-		ix = round(get_tan_value(angle) * (SCREENWIDTH / 2));
-		ix += (SCREENWIDTH / 2);
+		ix = roundf(get_tan_value(angle) * (SCREENWIDTH / 2));
+		ix += ((SCREENWIDTH / 2) / get_tan_value((t_angle){FOV/2}));
 	}
 	// printf("%i\n", ix);
 	return (ix);

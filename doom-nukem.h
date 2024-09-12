@@ -154,5 +154,8 @@ t_angle		new_angle(float angle);
 int			angle_to_screen(t_angle angle);
 t_angle		angle_to_vortex(t_box *box, t_vertex vortex);
 
+//Movement.c
+void		calc_move(t_box *box);
+
 
 #endif

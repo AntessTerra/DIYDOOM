@@ -72,8 +72,8 @@ static void	partial_seg(t_box *box, t_angle v1_angle, t_angle v2_angle, float *d
 
 static void	draw_clipped_wall(t_box *box, int v1_x_screen, int v2_x_screen, t_angle v1_angle, t_angle v2_angle, t_seg seg)
 {
-	if (v1_x_screen > SCREENWIDTH || v1_x_screen <= 0 || v2_x_screen > SCREENWIDTH || v2_x_screen <= 0)
-		return ;
+	// if (v1_x_screen > SCREENWIDTH || v1_x_screen <= 0 || v2_x_screen > SCREENWIDTH || v2_x_screen <= 0)
+	// 	return ;
 	// (void)v1_angle, (void)v2_angle;
 	float	dist_to_v1 = player_to_point(box, seg.p_start_vertex);
 	float	dist_to_v2 = player_to_point(box, seg.p_end_vertex);
@@ -92,10 +92,9 @@ static void	draw_clipped_wall(t_box *box, int v1_x_screen, int v2_x_screen, t_an
 	calc_ceeling_floor_heights(box, seg, v2_x_screen, dist_to_v2, &ceiling_v2_on_screen, &floor_v2_on_screen);
 
 	int color = get_wall_color(box, seg.p_linedef->p_right_sidedef->middle_texture);
-	if (v1_x_screen > SCREENWIDTH || v1_x_screen <= 0 || v2_x_screen > SCREENWIDTH || v2_x_screen <= 0
-		|| ceiling_v1_on_screen > SCREENHEIGHT || ceiling_v1_on_screen <= 0 || ceiling_v2_on_screen > SCREENHEIGHT || ceiling_v2_on_screen <= 0
-		|| floor_v1_on_screen > SCREENHEIGHT || floor_v1_on_screen <= 0 || floor_v2_on_screen > SCREENHEIGHT || floor_v2_on_screen <= 0)
-		return ;
+	// if ((int)ceiling_v1_on_screen > SCREENHEIGHT || (int)ceiling_v1_on_screen < 0 || (int)ceiling_v2_on_screen > SCREENHEIGHT || (int)ceiling_v2_on_screen < 0
+	// 	|| floor_v1_on_screen > SCREENHEIGHT || floor_v1_on_screen < 0 || floor_v2_on_screen > SCREENHEIGHT || floor_v2_on_screen < 0)
+	// 	return ;
 
 	draw_line(&box->image, v1_x_screen, ceiling_v1_on_screen, v1_x_screen, floor_v1_on_screen, color);
 	draw_line(&box->image, v2_x_screen, ceiling_v2_on_screen, v2_x_screen, floor_v2_on_screen, color);
@@ -117,10 +116,9 @@ static void	draw_clipped_wall(t_box *box, int v1_x_screen, int v2_x_screen, t_an
  */
 static void	clip_wall(t_box *box, t_solid_seg currWall, t_angle v1_angle, t_angle v2_angle, t_seg seg)
 {
-	(void)seg;
 	t_solid_seg	*foundWall, *nextWall;
 
-	foundWall = box->map->solid_segs;
+	foundWall = box->map->solid_segs->next;
 
 	while (foundWall && foundWall->x_end < currWall.x_start - 1)
 		foundWall = foundWall->next;
@@ -135,9 +133,8 @@ static void	clip_wall(t_box *box, t_solid_seg currWall, t_angle v1_angle, t_angl
 			add_solid_seg_after(box, p_curr_wall, p_curr_wall);
 			return ;
 		}
-		draw_clipped_wall(box, currWall.x_start, currWall.x_end, v1_angle, v2_angle, seg);
+		draw_clipped_wall(box, currWall.x_start, foundWall->x_start - 1, v1_angle, v2_angle, seg);
 		foundWall->x_start = currWall.x_start;
-		return ;
 	}
 	// printf("%i <= %i\n", currWall.x_end, foundWall->x_end);
 	if (currWall.x_end <= foundWall->x_end)
@@ -147,7 +144,7 @@ static void	clip_wall(t_box *box, t_solid_seg currWall, t_angle v1_angle, t_angl
 	// printf("%i >= %i\n", currWall.x_end, nextWall->next->x_start - 1);
 	while (currWall.x_end >= nextWall->next->x_start - 1)
 	{
-		draw_clipped_wall(box, currWall.x_start, currWall.x_end, v1_angle, v2_angle, seg);
+		draw_clipped_wall(box, nextWall->x_end + 1, nextWall->next->x_start - 1, v1_angle, v2_angle, seg);
 		nextWall = nextWall->next;
 		if (currWall.x_end <= nextWall->x_end)
 		{
@@ -163,7 +160,7 @@ static void	clip_wall(t_box *box, t_solid_seg currWall, t_angle v1_angle, t_angl
 		}
 	}
 	// printf("%i, %i | %i, %i\n", nextWall->x_start, nextWall->x_end, foundWall->x_start, foundWall->x_end);
-	draw_clipped_wall(box, currWall.x_start, currWall.x_end, v1_angle, v2_angle, seg);
+	draw_clipped_wall(box, nextWall->x_end + 1, currWall.x_end, v1_angle, v2_angle, seg);
 	foundWall->x_end = currWall.x_end;
 	if (nextWall != foundWall)
 	{
@@ -178,14 +175,15 @@ void	add_wall_in_fov(t_box *box, t_angle v1_angle, t_angle v2_angle, t_angle v1_
 	int v1_x = angle_to_screen(v1_angle_from_player);
 	int v2_x = angle_to_screen(v2_angle_from_player);
 
+	if (v2_x < 0)
+		v2_x = SCREENWIDTH;
+	// if (v1_x < 0)
+	// 	v1_x = 0;
 	if (v1_x == v2_x)
 		return;
 
-	// printf("%i | %i\n", v1_x, v2_x);
-	// draw_line(&box->image, v1_x, 0, v1_x, SCREENHEIGHT, color);
-	// draw_line(&box->image, v2_x, 0, v2_x, SCREENHEIGHT, color);
-	clip_wall(box, (t_solid_seg){v1_x, v2_x, NULL}, v1_angle, v2_angle, seg);
-	// (void)color;
+	if (seg.p_left_sector == NULL)
+		clip_wall(box, (t_solid_seg){v1_x, v2_x, NULL}, v1_angle, v2_angle, seg);
 }
 
 static bool	clip_vertexes_in_FOV(t_box *box, t_vertex v1, t_vertex v2, t_angle *v1_angle, t_angle *v2_angle, t_angle *v1_angle_from_player, t_angle *v2_angle_from_player)
@@ -245,8 +243,7 @@ static void	render_subsector(t_box *box, int subsector_id)
 				remap_x_to_screen(box, (*seg.p_end_vertex).x),
 				remap_y_to_screen(box, (*seg.p_end_vertex).y),
 				get_wall_color(box, seg.p_linedef->p_right_sidedef->middle_texture));
-			if (!seg.p_left_sector)
-				add_wall_in_fov(box, v1_angle, v2_angle, v1_angle_from_player, v2_angle_from_player, seg);
+			add_wall_in_fov(box, v1_angle, v2_angle, v1_angle_from_player, v2_angle_from_player, seg);
 		}
 	}
 }
