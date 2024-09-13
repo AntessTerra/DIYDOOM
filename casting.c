@@ -46,42 +46,230 @@ static float	get_scale_factor(t_box *box, int v_x_screen, t_angle seg_to_normal,
 	return (scale_factor);
 }
 
-void	calculate_wall_height(t_box *box, int v1_x_screen, int v2_x_screen, t_angle v1_angle, t_seg seg)
+static void draw_upper_section(t_box *box, t_segment_render_data *render_data, int ix, int curr_ceiling, int color)
+{
+	if (render_data->b_draw_upper_section)
+	{
+		int upper_height = render_data->upper_height;
+		render_data->upper_height += render_data->upper_height_step;
+
+		if (upper_height >= box->map->floor_clip_height[ix])
+			upper_height = box->map->floor_clip_height[ix] - 1;
+
+		if (upper_height >= curr_ceiling)
+		{
+			draw_line(&box->image, ix, curr_ceiling, ix, upper_height, color);
+			box->map->ceiling_clip_height[ix] = upper_height;
+		}
+		else
+			box->map->ceiling_clip_height[ix] = curr_ceiling - 1;
+	}
+	else if (render_data->update_ceiling)
+		box->map->ceiling_clip_height[ix] = curr_ceiling - 1;
+}
+
+static void draw_middle_section(t_box *box, int ix, int curr_ceiling, int curr_floor, int color)
+{
+	draw_line(&box->image, ix, curr_ceiling, ix, curr_floor, color);
+	box->map->ceiling_clip_height[ix] = SCREENHEIGHT;
+	box->map->floor_clip_height[ix] = -1;
+}
+
+static void draw_lower_section(t_box *box, t_segment_render_data *render_data, int ix, int curr_floor, int color)
+{
+	if (render_data->b_draw_lower_section)
+	{
+		int lower_height = render_data->lower_height;
+		render_data->lower_height += render_data->lower_height_step;
+
+		if (lower_height <= box->map->ceiling_clip_height[ix])
+			lower_height = box->map->ceiling_clip_height[ix] + 1;
+
+		if (lower_height <= curr_floor)
+		{
+			draw_line(&box->image, ix, lower_height, ix, curr_floor, color);
+			box->map->floor_clip_height[ix] = lower_height;
+		}
+		else
+			box->map->floor_clip_height[ix] = curr_floor + 1;
+	}
+	else if (render_data->update_floor)
+		box->map->floor_clip_height[ix] = curr_floor + 1;
+}
+
+static bool	validate_range(t_box *box, t_segment_render_data *render_data, int *ix, int *curr_ceiling, int *curr_floor)
+{
+	if (*curr_ceiling < box->map->ceiling_clip_height[*ix] + 1)
+		*curr_ceiling = box->map->ceiling_clip_height[*ix] + 1;
+
+	if (*curr_floor >= box->map->floor_clip_height[*ix])
+		*curr_floor = box->map->floor_clip_height[*ix] - 1;
+
+	if (*curr_ceiling > *curr_floor)
+	{
+		render_data->ceiling_end += render_data->ceiling_step;
+		render_data->floor_start += render_data->floor_step;
+		*ix = *ix + 1;
+		return (false);
+	}
+	return (true);
+}
+
+static void	render_segment(t_box *box, t_segment_render_data *render_data)
+{
+	int color, curr_ceiling, curr_floor;
+
+	if (render_data->p_seg->p_left_sector)
+		color = get_wall_color(box, render_data->p_seg->p_linedef->p_right_sidedef->upper_texture);
+	else
+		color = get_wall_color(box, render_data->p_seg->p_linedef->p_right_sidedef->middle_texture);
+
+	int ix = render_data->v1_x_screen;
+
+	while (ix <= render_data->v2_x_screen)
+	{
+		curr_ceiling = render_data->ceiling_end;
+		curr_floor = render_data->floor_start;
+
+		if (!validate_range(box, render_data, &ix, &curr_ceiling, &curr_floor))
+			continue;
+		if (render_data->p_seg->p_left_sector)
+		{
+			draw_upper_section(box, render_data, ix, curr_ceiling, color);
+			draw_lower_section(box, render_data, ix, curr_floor, color);
+		}
+		else
+			draw_middle_section(box, ix, curr_ceiling, curr_floor, color);
+
+		render_data->ceiling_end += render_data->ceiling_step;
+		render_data->floor_start += render_data->floor_step;
+		ix++;
+	}
+}
+
+static void	ceiling_floor_update(t_box *box, t_segment_render_data *render_data)
+{
+	if (!render_data->p_seg->p_left_sector)
+	{
+		render_data->update_floor = true;
+		render_data->update_ceiling = true;
+		return ;
+	}
+
+	if (render_data->left_sector_ceiling != render_data->right_sector_ceiling)
+		render_data->update_ceiling = true;
+	else
+		render_data->update_ceiling = false;
+
+	if (render_data->left_sector_floor != render_data->right_sector_floor)
+		render_data->update_floor = true;
+	else
+		render_data->update_floor = false;
+
+	// closed door
+	if (render_data->p_seg->p_left_sector->ceiling_height <= render_data->p_seg->p_right_sector->floor_height || render_data->p_seg->p_left_sector->floor_height >= render_data->p_seg->p_right_sector->ceiling_height)
+		render_data->update_ceiling = render_data->update_floor = true;
+
+	// below view plane
+	if (render_data->p_seg->p_right_sector->ceiling_height <= box->map->player.z)
+		render_data->update_ceiling = false;
+
+	// above view plane
+	if (render_data->p_seg->p_right_sector->floor_height >= box->map->player.z)
+		render_data->update_floor = false;
+}
+
+static void	calculate_wall_height(t_box *box, int v1_x_screen, int v2_x_screen, t_angle v1_angle, t_seg seg)
 {
 	t_angle seg_to_normal_angle = new_angle(seg.angle.angle_val + 90);
-
 	t_angle normal_to_v1_angle = new_angle(seg_to_normal_angle.angle_val - v1_angle.angle_val);
-
 	t_angle seg_to_player_angle = new_angle(90 - normal_to_v1_angle.angle_val);
 
-	float dist_to_v1 = player_to_point(box, seg.p_start_vertex);
-	float dist_to_normal = get_sin_value(seg_to_player_angle) * dist_to_v1;
+	t_segment_render_data	render_data = {0};
 
-	float v1_scale_factor = get_scale_factor(box, v1_x_screen, seg_to_normal_angle, dist_to_normal);
-	float v2_scale_factor = get_scale_factor(box, v2_x_screen, seg_to_normal_angle, dist_to_normal);
+	render_data.v1_x_screen = v1_x_screen;
+	render_data.v2_x_screen = v2_x_screen;
+	render_data.v1_angle = v1_angle;
+	// render_data.v2_angle = v2_angle;
 
-	float steps = (v2_scale_factor - v1_scale_factor) / (v2_x_screen - v1_x_screen);
+	render_data.dist_to_v1 = player_to_point(box, seg.p_start_vertex);
+	render_data.dist_to_normal = get_sin_value(seg_to_player_angle) * render_data.dist_to_v1;
 
-	float ceiling = seg.p_right_sector->ceiling_height - box->map->player.z;
-	float floor = seg.p_right_sector->floor_height - box->map->player.z;
+	render_data.v1_scale_factor = get_scale_factor(box, v1_x_screen, seg_to_normal_angle, render_data.dist_to_normal);
+	render_data.v2_scale_factor = get_scale_factor(box, v2_x_screen, seg_to_normal_angle, render_data.dist_to_normal);
 
-	float ceiling_step = -(ceiling * steps);
-	float ceiling_end = (SCREENHEIGHT / 2) - (ceiling * v1_scale_factor);
+	render_data.steps = (render_data.v2_scale_factor - render_data.v1_scale_factor) / (v2_x_screen - v1_x_screen);
 
-	float floor_step = -(floor * steps);
-	float floor_start = (SCREENHEIGHT / 2) - (floor * v1_scale_factor);
+	render_data.right_sector_ceiling = seg.p_right_sector->ceiling_height - box->map->player.z;
+	render_data.right_sector_floor = seg.p_right_sector->floor_height - box->map->player.z;
 
-	int color = get_wall_color(box, seg.p_linedef->p_right_sidedef->middle_texture);
+	render_data.ceiling_step = -(render_data.right_sector_ceiling * render_data.steps);
+	render_data.ceiling_end = roundf((SCREENHEIGHT / 2) - (render_data.right_sector_ceiling * render_data.v1_scale_factor));
 
-	int ix = v1_x_screen;
-	while (ix <= v2_x_screen)
+	render_data.floor_step = -(render_data.right_sector_floor * render_data.steps);
+	render_data.floor_start = roundf((SCREENHEIGHT / 2) - (render_data.right_sector_floor * render_data.v1_scale_factor));
+
+	render_data.p_seg = &seg;
+
+	if (seg.p_left_sector)
 	{
-		draw_line(&box->image, ix, ceiling_end, ix, floor_start, color);
-		++ix;
+		render_data.left_sector_ceiling = seg.p_left_sector->ceiling_height - box->map->player.z;
+		render_data.left_sector_floor = seg.p_left_sector->floor_height - box->map->player.z;
 
-		ceiling_end += ceiling_step;
-		floor_start += floor_step;
+		ceiling_floor_update(box, &render_data);
+
+		if (render_data.left_sector_ceiling < render_data.right_sector_ceiling)
+		{
+			render_data.b_draw_upper_section = true;
+			render_data.upper_height_step = -(render_data.left_sector_ceiling * render_data.steps);
+			render_data.upper_height = roundf((SCREENHEIGHT / 2) - (render_data.left_sector_ceiling * render_data.v1_scale_factor));
+		}
+
+		if (render_data.left_sector_floor > render_data.right_sector_floor)
+		{
+			render_data.b_draw_lower_section = true;
+			render_data.lower_height_step = -(render_data.left_sector_floor * render_data.steps);
+			render_data.lower_height = roundf((SCREENHEIGHT / 2) - (render_data.left_sector_floor * render_data.v1_scale_factor));
+		}
 	}
+
+	render_segment(box, &render_data);
+}
+
+static void	clip_pass_wall(t_box *box, int v1_x_screen, int v2_x_screen, t_angle v1_angle, t_seg seg)
+{
+	t_solid_seg	*foundWall = NULL, *nextWall = NULL, currWall = {v1_x_screen, v2_x_screen, NULL};
+
+	foundWall = box->map->solid_segs;
+	while (foundWall && foundWall->x_end < currWall.x_start - 1)
+		foundWall = foundWall->next;
+	// printf("%i, %i\n", currWall.x_start, currWall.x_end);
+	// print_solid_segs(box);
+	if (currWall.x_start < foundWall->x_start)
+	{
+		// printf("TEST\n");
+		if (currWall.x_end < foundWall->x_start - 1)
+		{
+			calculate_wall_height(box, currWall.x_start, currWall.x_end, v1_angle, seg);
+			return ;
+		}
+		calculate_wall_height(box, currWall.x_start, foundWall->x_start - 1, v1_angle, seg);
+	}
+	// printf("%i <= %i\n", currWall.x_end, foundWall->x_end);
+	if (currWall.x_end <= foundWall->x_end)
+		return ;
+
+	nextWall = foundWall;
+	// printf("%i >= %i\n", currWall.x_end, nextWall->next->x_start - 1);
+	while (currWall.x_end >= nextWall->next->x_start - 1)
+	{
+		calculate_wall_height(box, nextWall->x_end + 1, nextWall->next->x_start - 1, v1_angle, seg);
+		nextWall = nextWall->next;
+		if (currWall.x_end <= nextWall->x_end)
+			return ;
+	}
+	// printf("%i, %i | %i, %i\n", nextWall->x_start, nextWall->x_end, foundWall->x_start, foundWall->x_end);
+	calculate_wall_height(box, nextWall->x_end + 1, currWall.x_end, v1_angle, seg);
 }
 
 /**
@@ -96,7 +284,7 @@ void	calculate_wall_height(t_box *box, int v1_x_screen, int v2_x_screen, t_angle
  *
  * return: 0
  */
-void	clip_wall(t_box *box, int v1_x_screen, int v2_x_screen, t_angle v1_angle, t_seg seg)
+static void	clip_solid_wall(t_box *box, int v1_x_screen, int v2_x_screen, t_angle v1_angle, t_seg seg)
 {
 	t_solid_seg	*foundWall = NULL, *nextWall = NULL, currWall = {v1_x_screen, v2_x_screen, NULL};
 
@@ -161,7 +349,24 @@ void	add_wall_in_fov(t_box *box, t_angle v1_angle, t_angle v1_angle_from_player,
 		return;
 
 	if (seg.p_left_sector == NULL)
-		clip_wall(box, v1_x, v2_x, v1_angle, seg);
+	{
+		clip_solid_wall(box, v1_x, v2_x, v1_angle, seg);
+		return ;
+	}
+
+	if (seg.p_left_sector->ceiling_height <= seg.p_right_sector->floor_height
+		|| seg.p_left_sector->floor_height >= seg.p_right_sector->ceiling_height)
+	{
+		clip_solid_wall(box, v1_x, v2_x, v1_angle, seg);
+		return ;
+	}
+
+	if (seg.p_right_sector->ceiling_height != seg.p_left_sector->ceiling_height
+		|| seg.p_right_sector->floor_height != seg.p_left_sector->floor_height)
+	{
+		clip_pass_wall(box, v1_x, v2_x, v1_angle, seg);
+		return ;
+	}
 }
 
 static bool	clip_vertexes_in_FOV(t_box *box, t_vertex v1, t_vertex v2, t_angle *v1_angle, t_angle *v2_angle, t_angle *v1_angle_from_player, t_angle *v2_angle_from_player)
@@ -207,7 +412,6 @@ static void	render_subsector(t_box *box, int subsector_id)
 	t_seg		seg;
 
 	uint32_t	i = -1;
-	// printf("Subsector %i\n", subsector_id);
 	while (++i < subsector.seg_count)
 	{
 		seg = box->map->segs[subsector.first_seg_id + i];

@@ -56,6 +56,8 @@ int	free_stuff(t_box *box)
 	}
 	free_solid_segs(box);
 	free(box->map->screen_x_to_angle);
+	free(box->map->ceiling_clip_height);
+	free(box->map->floor_clip_height);
 	return (0);
 }
 
@@ -152,6 +154,10 @@ int	key_press(int key, t_box *box)
 		box->map->player.move_y = 1;
 	else if (key == 'd')
 		box->map->player.move_y = -1;
+	else if (key == ' ')
+		box->map->player.move_z = 1;
+	else if (key == 65507) // ctrl key
+		box->map->player.move_z = -1;
 	// printf("Key pressed: %i\n", key);
 	return (0);
 }
@@ -184,6 +190,10 @@ int	key_release(int key, t_box *box)
 		box->map->player.move_y = 0;
 	else if (key == 'd')
 		box->map->player.move_y = 0;
+	else if (key == ' ')
+		box->map->player.move_z = 0;
+	else if (key == 65507) // ctrl key
+		box->map->player.move_z = 0;
 	// else if (key == 65453 && box->WAD.m > 0) // - numpad key
 	// 		box->WAD.m--;
 	// else if (key == 65363 && box->WAD.m < N_MAPS) // + numpad key

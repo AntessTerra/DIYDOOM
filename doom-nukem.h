@@ -79,6 +79,7 @@ typedef struct s_rect
 	uint32_t	width, height;
 	int			color;
 }				t_rect;
+
 typedef struct s_WAD
 {
 	int				fd;

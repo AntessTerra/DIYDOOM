@@ -58,6 +58,16 @@ static void	update_screen(t_box *box)
 	free_solid_segs(box);
 	add_solid_seg_before(box, NULL, new_solid_seg(SCREENWIDTH, INT_MAX));
 	add_solid_seg_before(box, NULL, new_solid_seg(INT_MIN, -1));
+
+	int i = -1;
+	while (++i <= SCREENWIDTH)
+		box->map->floor_clip_height[i] = SCREENHEIGHT;
+
+	i = -1;
+	while (++i <= SCREENWIDTH)
+		box->map->ceiling_clip_height[i] = -1;
+
+
 	render_fov(box);
 	draw_automap(box);
 	render_bsp_nodes(box, box->WAD.maps[0].n_nodes - 1);

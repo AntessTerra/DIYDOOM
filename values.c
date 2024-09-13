@@ -252,6 +252,7 @@ void	init_values(t_box *box)
 	box->map = &box->WAD.maps[0];
 	box->map->player.move_x = 0;
 	box->map->player.move_y = 0;
+	box->map->player.move_z = 0;
 	box->map->player.rotate = 0;
 	box->map->solid_segs = NULL;
 	add_solid_seg_before(box, NULL, new_solid_seg(SCREENWIDTH, INT_MAX));
@@ -265,6 +266,17 @@ void	init_values(t_box *box)
 	int i = -1;
 	while (++i <= SCREENWIDTH)
 		box->map->screen_x_to_angle[i].angle_val = atan(((SCREENWIDTH / 2) - i) / (float)box->map->player.dist_to_screen) * 180 / M_PI;
+
+	box->map->floor_clip_height = malloc((SCREENWIDTH + 1) * sizeof(int));
+	i = -1;
+	while (++i <= SCREENWIDTH)
+		box->map->floor_clip_height[i] = SCREENHEIGHT;
+
+	box->map->ceiling_clip_height = malloc((SCREENWIDTH + 1) * sizeof(int));
+	i = -1;
+	while (++i <= SCREENWIDTH)
+		box->map->ceiling_clip_height[i] = -1;
+
 }
 
 /**

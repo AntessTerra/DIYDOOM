@@ -32,4 +32,8 @@ void	calc_move(t_box *box)
 		box->map->player.x += get_sin_value(box->map->player.angle) * box->map->player.move_speed;
 		box->map->player.y -= get_cos_value(box->map->player.angle) * box->map->player.move_speed;
 	}
+	if (box->map->player.move_z == 1) // space key
+		box->map->player.z += box->map->player.move_speed;
+	if (box->map->player.move_z == -1) // ctrl key
+		box->map->player.z -= box->map->player.move_speed;
 }

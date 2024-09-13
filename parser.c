@@ -190,6 +190,7 @@ static int	build_linedefs(t_box *box, uint32_t m)
 		linedef->flags = WAD_linedef->flags;
 		linedef->line_type = WAD_linedef->line_type;
 		linedef->sector_tag = WAD_linedef->sector_tag;
+
 		linedef->p_right_sidedef = NULL;
 		linedef->p_left_sidedef = NULL;
 		if (WAD_linedef->right_sidedef != 0xFFFF)
@@ -220,12 +221,26 @@ static int	build_segs(t_box *box, uint32_t m)
 		seg->direction = WAD_seg->direction;
 		seg->offset = (float)(WAD_seg->offset << 16) / (float)(1 << 16);
 
+		t_sidedef	*p_right_sidedef;
+		t_sidedef	*p_left_sidedef;
+
+		if (seg->direction)
+		{
+			p_right_sidedef = seg->p_linedef->p_left_sidedef;
+			p_left_sidedef = seg->p_linedef->p_right_sidedef;
+		}
+		else
+		{
+			p_right_sidedef = seg->p_linedef->p_right_sidedef;
+			p_left_sidedef = seg->p_linedef->p_left_sidedef;
+		}
+
 		seg->p_right_sector = NULL;
 		seg->p_left_sector = NULL;
-		if (seg->p_linedef->p_right_sidedef)
-			seg->p_right_sector = seg->p_linedef->p_right_sidedef->p_sector;
-		if (seg->p_linedef->p_left_sidedef)
-			seg->p_left_sector = seg->p_linedef->p_left_sidedef->p_sector;
+		if (p_right_sidedef)
+			seg->p_right_sector = p_right_sidedef->p_sector;
+		if (p_left_sidedef)
+			seg->p_left_sector = p_left_sidedef->p_sector;
 	}
 	return (0);
 }

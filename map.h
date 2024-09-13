@@ -132,6 +132,7 @@ typedef struct s_player
 	int			rotate;
 	int			move_x;
 	int			move_y;
+	int			move_z;
 	float		dist_to_screen;
 	t_angle		angle;
 }				t_player;
@@ -181,6 +182,44 @@ typedef struct s_solid_seg
 	struct s_solid_seg	*next;
 }				t_solid_seg;
 
+typedef struct s_segment_render_data
+{
+	int		v1_x_screen;
+	int		v2_x_screen;
+
+	t_angle	v1_angle;
+	t_angle	v2_angle;
+
+	float	dist_to_v1;
+	float	dist_to_normal;
+	float	v1_scale_factor;
+	float	v2_scale_factor;
+	float	steps;
+
+	float	right_sector_ceiling;
+	float	right_sector_floor;
+	float	ceiling_step;
+	float	ceiling_end;
+	float	floor_step;
+	float	floor_start;
+
+	float	left_sector_ceiling;
+	float	left_sector_floor;
+
+	bool	b_draw_upper_section;
+	bool	b_draw_lower_section;
+
+	float	upper_height_step;
+	float	upper_height;
+	float	lower_height_step;
+	float	lower_height;
+
+	bool	update_floor;
+	bool	update_ceiling;
+
+	t_seg	*p_seg;
+}				t_segment_render_data;
+
 typedef struct s_map
 {
 	t_WAD_thing			*WAD_things;
@@ -214,7 +253,10 @@ typedef struct s_map
 	int				automap_scale_factor;
 	t_solid_seg		*solid_segs;
 	t_angle			*screen_x_to_angle;
+
 	t_texture_color	texture_to_color[MAX_TEXTURE_COLORS];
+	int				*ceiling_clip_height;
+	int				*floor_clip_height;
 }				t_map;
 
 #endif
