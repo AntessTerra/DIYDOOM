@@ -45,7 +45,7 @@ t_angle	angle_to_vortex(t_box *box, t_vertex vortex)
 	float Vdx = vortex.x - box->map->player.x;
 	float Vdy = vortex.y - box->map->player.y;
 
-	t_angle angle = new_angle(atan2f(Vdy, Vdx) * 180 / M_PI);
+	t_angle angle = new_angle(atan2f(Vdy, Vdx) * 180.f / M_PI);
 
 	return (angle);
 }
@@ -54,8 +54,6 @@ int	angle_to_screen(t_angle angle)
 {
 	int	ix = 0;
 
-	normalize_360(&angle.angle_val);
-	// printf("DEBUG: %f° == ", angle.angle_val);
 	if (angle.angle_val > 90)
 	{
 		angle.angle_val -= 90;
@@ -67,6 +65,5 @@ int	angle_to_screen(t_angle angle)
 		ix = roundf(get_tan_value(angle) * (SCREENWIDTH / 2));
 		ix += ((SCREENWIDTH / 2) / get_tan_value((t_angle){FOV/2}));
 	}
-	// printf("%i\n", ix);
 	return (ix);
 }

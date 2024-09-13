@@ -19,14 +19,6 @@ void	my_mlx_put_image_to_window(t_box *box, t_image *image, int x, int y, int sp
 
 void	draw_line(t_image *image, int beginX, int beginY, int endX, int endY, int color)
 {
-	if (beginX < 0)
-		beginX = 0;
-	if (beginX > SCREENWIDTH)
-		beginX = SCREENWIDTH;
-	if (endX < 0)
-		endX = 0;
-	if (endX > SCREENWIDTH)
-		endX = SCREENWIDTH;
 	if (beginY < 0)
 		beginY = 0;
 	if (beginY > SCREENHEIGHT)

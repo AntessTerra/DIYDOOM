@@ -81,7 +81,7 @@ static void	insertion_sort(t_box *box)
  *
  * return: 0
  */
-void	add_solid_seg_after(t_box *box, t_solid_seg *what, t_solid_seg *where)
+void	add_solid_seg_before(t_box *box, t_solid_seg *where, t_solid_seg *what)
 {
 	t_solid_seg	*curr, *tmp;
 
@@ -93,7 +93,7 @@ void	add_solid_seg_after(t_box *box, t_solid_seg *what, t_solid_seg *where)
 	curr = box->map->solid_segs;
 	while (curr->next)
 	{
-		if (curr == where)
+		if (curr->next == where)
 		{
 			tmp = curr->next;
 			curr->next = what;
@@ -168,18 +168,26 @@ void	free_solid_segs(t_box *box)
  *
  * return: 0
  */
-void	delete_seg(t_box *box, t_solid_seg *seg)
+void	delete_seg(t_box *box, t_solid_seg *first, t_solid_seg *last)
 {
-	t_solid_seg	*tmp;
+	t_solid_seg	*tmp, *to_rem;
 
 	tmp = box->map->solid_segs;
 	while (tmp)
 	{
-		if (tmp->next == seg)
+		// printf("TMP: %i,%i\n", tmp->x_start, tmp->x_end);
+		if (tmp->next == first)
 		{
-			tmp->next = seg->next;
-			free(seg);
-			return ;
+			to_rem = tmp->next;
+			// printf("REMOVING: %i,%i\n", to_rem->x_start, to_rem->x_end);
+			tmp->next = to_rem->next;
+			free(to_rem);
+			while (tmp->next != last)
+			{
+				to_rem = tmp->next;
+				tmp->next = to_rem->next;
+				free(to_rem);
+			}
 		}
 		tmp = tmp->next;
 	}
@@ -246,21 +254,17 @@ void	init_values(t_box *box)
 	box->map->player.move_y = 0;
 	box->map->player.rotate = 0;
 	box->map->solid_segs = NULL;
-	add_solid_seg_after(box, new_solid_seg(SCREENWIDTH, INT_MAX), NULL);
-	add_solid_seg_after(box, new_solid_seg(INT_MIN, -1), NULL);
+	add_solid_seg_before(box, NULL, new_solid_seg(SCREENWIDTH, INT_MAX));
+	add_solid_seg_before(box, NULL, new_solid_seg(INT_MIN, -1));
 
 	box->map->automap_scale_factor = 20;
 	box->map->player.move_speed = 0.5;
 
 	box->map->screen_x_to_angle = malloc((SCREENWIDTH + 1) * sizeof(t_angle));
-	t_angle	screen_angle = new_angle(FOV / 2.0f);
-	float	f_step = (float)FOV / (float)(SCREENWIDTH + 1);
+	box->map->player.dist_to_screen = (SCREENWIDTH / 2) / get_tan_value((t_angle){FOV / 2});
 	int i = -1;
 	while (++i <= SCREENWIDTH)
-	{
-		box->map->screen_x_to_angle[i] = screen_angle;
-		screen_angle.angle_val -= f_step;
-	}
+		box->map->screen_x_to_angle[i].angle_val = atan(((SCREENWIDTH / 2) - i) / (float)box->map->player.dist_to_screen) * 180 / M_PI;
 }
 
 /**
@@ -284,15 +288,15 @@ void	init_textures(t_box *box)
 	png_file_to_image(box->mlx, &box->textures[UI_PICKUPS], "textures/ui_pickups.png");
 	split_spritesheet(&box->textures[UI_PICKUPS], 8, 5, 16, 16);
 
-	// clip_wall(box, new_solid_seg(69, 80, 0), 0);
-	// clip_wall(box, new_solid_seg(46, 69, 0), 0);
-	// clip_wall(box, new_solid_seg(195, 210, 0), 0);
-	// clip_wall(box, new_solid_seg(107, 195, 0), 0);
-	// clip_wall(box, new_solid_seg(223, 291, 0), 0);
-	// clip_wall(box, new_solid_seg(76, 107, 0), 0);
-	// clip_wall(box, new_solid_seg(0, 42, 0), 0);
-	// print_solid_segs(box, 0);
-	// delete_seg(box, box->wad.maps[0].solid_segs->next, 0);
-	// print_solid_segs(box, 0);
+	// print_solid_segs(box);
+	// clip_wall(box, 69, 80, (t_angle){0}, (t_angle){0}, (t_seg){0});
+	// clip_wall(box, 46, 69, (t_angle){0}, (t_angle){0}, (t_seg){0});
+	// clip_wall(box, 195, 210, (t_angle){0}, (t_angle){0}, (t_seg){0});
+	// clip_wall(box, 107, 195, (t_angle){0}, (t_angle){0}, (t_seg){0});
+	// clip_wall(box, 223, 291, (t_angle){0}, (t_angle){0}, (t_seg){0});
+	// clip_wall(box, 76, 107, (t_angle){0}, (t_angle){0}, (t_seg){0});
+	// clip_wall(box, 0, 42, (t_angle){0}, (t_angle){0}, (t_seg){0});
+	// delete_seg(box, box->map->solid_segs->next, NULL);
+	// print_solid_segs(box);
 }
 

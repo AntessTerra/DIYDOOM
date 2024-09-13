@@ -132,6 +132,7 @@ typedef struct s_player
 	int			rotate;
 	int			move_x;
 	int			move_y;
+	float		dist_to_screen;
 	t_angle		angle;
 }				t_player;
 
