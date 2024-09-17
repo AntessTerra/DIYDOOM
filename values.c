@@ -1,27 +1,10 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   values.c                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: phelebra <xhelp00@gmail.com>               +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/02/08 18:52:55 by jbartosi          #+#    #+#             */
-/*   Updated: 2023/10/16 16:04:56 by phelebra         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "doom-nukem.h"
 
 /**
- * sorted_insert()
- * ---------------
+ * Inserts a solid segment into a sorted list
  *
- * Inserts a solid segment in a sorted linked list
- *
- * param: t_solid_seg *node
- * param: t_solid_seg *sorted
- *
- * return: t_solid_seg *
+ * @param t_solid_seg* node
+ * @param t_solid_seg* sorted
  */
 static t_solid_seg	*sorted_insert(t_solid_seg *node, t_solid_seg *sorted)
 {
@@ -43,14 +26,9 @@ static t_solid_seg	*sorted_insert(t_solid_seg *node, t_solid_seg *sorted)
 }
 
 /**
- * insertion_sort()
- * ----------------
+ * Sorts the solid segments in a map
  *
- * Sorts the solid segments in a current map
- *
- * param: t_box *box
- *
- * return: 0
+ * @param t_box* box
  */
 static void	insertion_sort(t_box *box)
 {
@@ -70,16 +48,11 @@ static void	insertion_sort(t_box *box)
 }
 
 /**
- * add_solid_seg_after()
- * ---------------------
+ * Adds a solid segment before a given segment
  *
- * Adds a solid segment after a given segment
- *
- * param: t_box *box
- * param: t_solid_seg *what
- * param: t_solid_seg *where
- *
- * return: 0
+ * @param t_box* box
+ * @param t_solid_seg* where
+ * @param t_solid_seg* what
  */
 void	add_solid_seg_before(t_box *box, t_solid_seg *where, t_solid_seg *what)
 {
@@ -107,16 +80,12 @@ void	add_solid_seg_before(t_box *box, t_solid_seg *where, t_solid_seg *what)
 }
 
 /**
- * new_solid_seg()
- * ---------------
- *
  * Creates a new solid segment
  *
- * param: int start
- * param: int end
- * param: int color
+ * @param int start
+ * @param int end
  *
- * return: t_solid_seg *
+ * @return t_solid_seg* - new solid segment
  */
 t_solid_seg	*new_solid_seg(int start, int end)
 {
@@ -130,43 +99,28 @@ t_solid_seg	*new_solid_seg(int start, int end)
 }
 
 /**
- * free_solid_segs()
- * -----------------
- *
  * Frees all the solid segments stored in a current map
  *
- * param: t_box *box
- *
- * return: 0
+ * @param t_box* box
  */
 void	free_solid_segs(t_box *box)
 {
 	t_solid_seg	*tmp;
-	// int			m;
 
-	// m = -1;
-	// while (++m < N_MAPS)
-	// {
-		while (box->map->solid_segs)
-		{
-			tmp = box->map->solid_segs;
-			box->map->solid_segs = (box->map->solid_segs)->next;
-			free(tmp);
-		}
-	// }
+	while (box->map->solid_segs)
+	{
+		tmp = box->map->solid_segs;
+		box->map->solid_segs = (box->map->solid_segs)->next;
+		free(tmp);
+	}
 }
 
 /**
- * delete_seg()
- * ------------------
+ * Deletes a segment from first to !!before!! last
  *
- * Prints all segments stored in a current map
- *
- * param: t_box *box
- * param: t_solid_seg *seg
-
- *
- * return: 0
+ * @param t_box* box
+ * @param t_solid_seg* first
+ * @param t_solid_seg* last
  */
 void	delete_seg(t_box *box, t_solid_seg *first, t_solid_seg *last)
 {
@@ -194,14 +148,9 @@ void	delete_seg(t_box *box, t_solid_seg *first, t_solid_seg *last)
 }
 
 /**
- * print_solid_segs()
- * ------------------
+ * Prints all the solid segments stored in a current map
  *
- * Prints all segments stored in a current map
- *
- * param: t_box *box
- *
- * return: 0
+ * @param t_box* box
  */
 void	print_solid_segs(t_box *box)
 {
@@ -217,6 +166,14 @@ void	print_solid_segs(t_box *box)
 	printf("\n");
 }
 
+/**
+ * Gets wall color from buffer or generates a new one ans stores it in buffer
+ *
+ * @param t_box* box
+ * @param char* str - name of the texture used as a key
+ *
+ * @return {int} - color of the wall
+ */
 int	get_wall_color(t_box *box, char *str)
 {
 	uint32_t	i, added;
@@ -238,14 +195,9 @@ int	get_wall_color(t_box *box, char *str)
 }
 
 /**
- * init_values()
- * -------------
+ * Initializes all the values used in the game
  *
- * Inits all the values used
- *
- * param: t_box *box
- *
- * return: 0
+ * @param t_box* box
  */
 void	init_values(t_box *box)
 {
@@ -280,14 +232,9 @@ void	init_values(t_box *box)
 }
 
 /**
- * init_textures()
- * ---------------
+ * Initializes all the textures used in the game
  *
- * Inits all the textures used
- *
- * param: t_box *box
- *
- * return: 0
+ * @param t_box* box
  */
 void	init_textures(t_box *box)
 {

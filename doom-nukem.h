@@ -1,16 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   doom-nukem.h                                       :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: phelebra <xhelp00@gmail.com>               +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/06/10 16:51:55 by jbartosi          #+#    #+#             */
-/*   Updated: 2023/10/16 16:04:47 by phelebra         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
-
 #ifndef DOOM_NUKEM_H
 # define DOOM_NUKEM_H
 
@@ -50,6 +37,23 @@
 # define MAX_TEXTURES 100
 # define N_MAPS 9
 
+/**
+ * Structure to store data about the image
+ *
+ * @typedef {t_image} MLX image
+ * @property {void*} img - image pointer
+ * @property {unsigned char*} addr - address of the image
+ * @property {int} bits_pp - bits per pixel
+ * @property {int} line_len - length of the line
+ * @property {int} endian - endian
+ * @property {int} height - height of the image
+ * @property {int} width - width of the image
+ * @property {int} n_col - number of columns, used for spritesheets
+ * @property {int} n_row - number of rows, used for spritesheets
+ * @property {int} one_x - width of one sprite, used for spritesheets
+ * @property {int} one_y - height of one sprite, used for spritesheets
+ * @property {char*} name - name of the image
+ */
 typedef struct s_image
 {
 	void			*img;
@@ -66,6 +70,14 @@ typedef struct s_image
 	char			*name;
 }				t_image;
 
+/**
+ * Structure to store data about a directory
+ *
+ * @typedef {t_directory} Directory
+ * @property {uint32_t} lump_offset - offset of the lump
+ * @property {uint32_t} lump_size - size of the lump
+ * @property {char[9]} name - name of the directory
+ */
 typedef struct s_directory
 {
 	uint32_t	lump_offset;
@@ -73,13 +85,20 @@ typedef struct s_directory
 	char		name[9];
 }				t_directory;
 
-typedef struct s_rect
-{
-	uint32_t	x, y;
-	uint32_t	width, height;
-	int			color;
-}				t_rect;
-
+/**
+ * Structure to store WAD file data
+ *
+ * @typedef {t_WAD} WAD file data
+ * @property {int} fd - file descriptor
+ * @property {t_header} header - WAD header
+ * @property {t_directory*} dirs - array of directories
+ * @property {t_map[9]} maps - array of maps
+ *
+ * @typedef {t_header} WAD header
+ * @property {char[5]} type - WAD type
+ * @property {uint32_t} dir_count - number of directories
+ * @property {uint32_t} dir_offset - offset of the directories
+ */
 typedef struct s_WAD
 {
 	int				fd;
@@ -98,6 +117,18 @@ enum e_textures
 	UI_PICKUPS,
 };
 
+/**
+ * Main structure to store all the data
+ *
+ * @typedef {t_box} Main structure
+ * @property {void*} mlx - mlx pointer
+ * @property {void*} win - window pointer
+ * @property {t_image} image - main image
+ * @property {t_image} minimap - minimap image
+ * @property {t_image*} textures - array of textures
+ * @property {t_WAD} WAD - WAD file data
+ * @property {t_map*} map - pointer to the current map
+ */
 typedef struct s_box
 {
 	void			*mlx;
@@ -134,7 +165,6 @@ int			get_wall_color(t_box *box, char *str);
 void		my_mlx_put_image_to_window(t_box *box, t_image *img, int x, int y, int id);
 void		my_mlx_pyxel_put(t_image *img, int x, int y, int color);
 void		draw_line(t_image *image, int beginX, int beginY, int endX, int endY, int color);
-void		draw_rect(t_box *box, t_rect rect, bool filled);
 t_image		*new_image(void *mlx, t_image *img, int width, int height);
 t_image		*img_resize(void *mlx_ptr, t_image *src_img, float n_times_bigger);
 void		png_file_to_image(void *mlx, t_image *image, char *file);

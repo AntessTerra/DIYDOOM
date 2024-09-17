@@ -12,6 +12,11 @@
 
 #include "doom-nukem.h"
 
+/**
+ * Fills the screen with a grayish color
+ *
+ * @param t_box* box
+ */
 static void	render_fov(t_box *box)
 {
 	uint32_t x, y;
@@ -25,6 +30,11 @@ static void	render_fov(t_box *box)
 	}
 }
 
+/**
+ * Draws the automap in the top right corner
+ *
+ * @param t_box* box
+ */
 static void	draw_automap(t_box *box)
 {
 	uint32_t	i, y, x;
@@ -53,6 +63,11 @@ static void	draw_automap(t_box *box)
 	}
 }
 
+/**
+ * Updates the screen
+ *
+ * @param t_box* box
+ */
 static void	update_screen(t_box *box)
 {
 	free_solid_segs(box);
@@ -83,13 +98,10 @@ static void	update_screen(t_box *box)
 	// printf("-----------------------------------------------------\n");
 }
 
-/** timer()
- * 	-------
+/**
+ * Timer function that updates the game state
  *
- *  Timer function that is called every frame
- *
- * 	param: t_box *box
- * 	return: 0
+ * @param t_box* box
  */
 static int	timer(t_box *box)
 {
@@ -98,18 +110,8 @@ static int	timer(t_box *box)
 	return (0);
 }
 
-/** main()
- * 	------
- *
- *  Main function that initializes the mlx window and hooks
- *  Calls the parser to parse the WAD file
- *  Initializes the values and textures
- *  Creates the images for the window and minimap
- *  Hooks the events to the mlx window
- *  Calls the timer function to render the game
- *  Loops the mlx
- *
- * 	return: 0
+/**
+ * Main function that initializes the game
  */
 int	main(void)
 {

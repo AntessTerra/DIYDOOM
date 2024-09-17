@@ -1,26 +1,9 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   hook.c                                             :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: phelebra <xhelp00@gmail.com>               +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/02/08 18:52:55 by jbartosi          #+#    #+#             */
-/*   Updated: 2023/10/16 16:04:56 by phelebra         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "doom-nukem.h"
 
 /**
- * free_stuff()
- * ------------
+ * Free all the allocated memory
  *
- * Frees all the allocated memory
- *
- * param: t_box *box
- *
- * return: 0
+ * @param t_box* box
  */
 int	free_stuff(t_box *box)
 {
@@ -62,16 +45,11 @@ int	free_stuff(t_box *box)
 }
 
 /**
- * mouse_move()
- * ------------
- *
  * Processes mouse movement
  *
- * param: int x
- * param: int y
- * param: t_box *box
- *
- * return: 0
+ * @param int x
+ * @param int y
+ * @param t_box* box
  */
 int	mouse_move(int x, int y, t_box *box)
 {
@@ -83,17 +61,12 @@ int	mouse_move(int x, int y, t_box *box)
 }
 
 /**
- * mouse_press()
- * -------------
- *
  * Processes pressed mouse button
  *
- * param: int keycode
- * param: int x
- * param: int y
- * param: t_box *box
- *
- * return: 0
+ * @param int keycode
+ * @param int x
+ * @param int y
+ * @param t_box* box
  */
 int	mouse_press(int keycode, int x, int y, t_box *box)
 {
@@ -106,18 +79,12 @@ int	mouse_press(int keycode, int x, int y, t_box *box)
 }
 
 /**
- * mouse_release()
- * ---------------
- *
  * Processes released mouse button
  *
- * param: int keycode
- * param: int x
- * param: int y
- * param: t_box *box
- *
- * return: 0
- *
+ * @param int keycode
+ * @param int x
+ * @param int y
+ * @param t_box* box
  */
 int	mouse_release(int keycode, int x, int y, t_box *box)
 {
@@ -129,16 +96,10 @@ int	mouse_release(int keycode, int x, int y, t_box *box)
 }
 
 /**
- * key_press()
- * -----------
- *
  * Processes pressed key
  *
- * param: int key
- * param: t_box *box
- *
- * return: 0
- *
+ * @param int key
+ * @param t_box* box
  */
 int	key_press(int key, t_box *box)
 {
@@ -163,16 +124,10 @@ int	key_press(int key, t_box *box)
 }
 
 /**
- * key_release()
- * -------------
- *
  * Processes released key
  *
- * param: int key
- * param: t_box *box
- *
- * return: 0
- *
+ * @param int key
+ * @param t_box* box
  */
 int	key_release(int key, t_box *box)
 {
@@ -203,14 +158,11 @@ int	key_release(int key, t_box *box)
 }
 
 /**
- * exit_hook()
- * -----------
+ * Exits the game
  *
- * Exits the program
+ * @param t_box* box
  *
- * param: t_box *box
- * return: 0
- *
+ * @return Called when pressing the red cross on the window or pressing esc
  */
 int	exit_hook(t_box *box)
 {

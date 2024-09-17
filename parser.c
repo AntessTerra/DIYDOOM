@@ -274,11 +274,11 @@ static int	parse_maps(t_box *box)
 	return (0);
 }
 
-/*
-	parser
-
-	Creates a new mlx_image_alpha and sets its variabasdles
-*/
+/**
+ * Parses the WAD file
+ *
+ * @param t_box* box
+ */
 int	parser(t_box *box)
 {
 	uint32_t	i;

@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   map.h                                              :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jbartosi <marvin@42.fr>                    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/06 13:56:26 by jbartosi          #+#    #+#             */
-/*   Updated: 2024/09/06 13:56:30 by jbartosi         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #ifndef MAP_H
 # define MAP_H
 
@@ -220,6 +208,46 @@ typedef struct s_segment_render_data
 	t_seg	*p_seg;
 }				t_segment_render_data;
 
+/**
+ * Structure to store all the map data
+ *
+ * @typedef {t_map} Map structure
+ * @property {t_WAD_thing*} WAD_things - array of WAD things (monsters, players, etc.)
+ * @property {t_WAD_linedef*} WAD_linedefs - array of WAD linedefs
+ * @property {t_WAD_sidedef*} WAD_sidedefs - array of WAD sidedefs
+ * @property {t_vertex*} vertexes - array of WAD vertexes
+ * @property {t_WAD_seg*} WAD_segs - array of WAD segs
+ * @property {t_WAD_ssector*} WAD_ssectors - array of WAD subsectors
+ * @property {t_WAD_node*} WAD_nodes - array of WAD nodes
+ * @property {t_WAD_sector*} WAD_sectors - array of WAD sectors
+ *
+ * @property {t_linedef*} linedefs - array of better structured linedefs with pointers to vertexes and sidedefs
+ * @property {t_sidedef*} sidedefs - array of better structured sidedefs with pointers to sectors
+ * @property {t_seg*} segs - array of better structured segs with pointers to vertexes and linedefs
+ *
+ * @property {uint32_t} n_things - number of things
+ * @property {uint32_t} n_linedefs - number of linedefs
+ * @property {uint32_t} n_sidedefs - number of sidedefs
+ * @property {uint32_t} n_vertexes - number of vertexes
+ * @property {uint32_t} n_segs - number of segs
+ * @property {uint32_t} n_ssectors - number of subsectors
+ * @property {uint32_t} n_nodes - number of nodes
+ * @property {uint32_t} n_sectors - number of sectors
+ *
+ * @property {t_player} player - player data
+ * @property {char[5]} name - name of the map
+ * @property {int} min_x - minimum x coordinate of the map
+ * @property {int} min_y - minimum y coordinate of the map
+ * @property {int} max_x - maximum x coordinate of the map
+ * @property {int} max_y - maximum y coordinate of the map
+ * @property {int} automap_scale_factor - scale factor for the automap
+ * @property {t_solid_seg*} solid_segs - linked list of solid segs
+ * @property {t_angle*} screen_x_to_angle - array of angles for each screen x coordinate
+ *
+ * @property {t_texture_color} texture_to_color - array of colors for each texture name
+ * @property {int*} ceiling_clip_height - array of ceiling clip heights
+ * @property {int*} floor_clip_height - array of floor clip heights
+ */
 typedef struct s_map
 {
 	t_WAD_thing			*WAD_things;

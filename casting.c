@@ -12,22 +12,56 @@
 
 #include "doom-nukem.h"
 
+/**
+ * Remaps the x coordinate to the screen for the automap
+ *
+ * @param t_box* box
+ * @param int x
+ *
+ * @return {int} - remapped x
+ */
 int	remap_x_to_screen(t_box *box, int x)
 {
 	return (((x + (box->map->min_x * -1)) / box->map->automap_scale_factor));
 }
 
+/**
+ * Remaps the y coordinate to the screen for the automap
+ *
+ * @param t_box* box
+ * @param int y
+ *
+ * @return {int} - remapped y
+ */
 int	remap_y_to_screen(t_box *box, int y)
 {
 	return (((3500 - (y + (box->map->min_y * -1))) / box->map->automap_scale_factor));
 }
 
+/**
+ * Calculates the distance between the player and a point
+ *
+ * @param t_box* box
+ * @param t_vertex* ver
+ *
+ * @return {float} - distance
+ */
 static float	player_to_point(t_box * box, t_vertex *ver)
 {
 	// distance = square root ((X2 - X1)^2 + (y2 - y1)^2)
 	return (sqrt(pow(box->map->player.x - ver->x, 2) + pow(box->map->player.y - ver->y, 2)));
 }
 
+/**
+ * Calculates the scale factor of the wall
+ *
+ * @param t_box* box
+ * @param int v_x_screen
+ * @param t_angle seg_to_normal
+ * @param float dist_to_normal
+ *
+ * @return {float} - scale factor
+ */
 static float	get_scale_factor(t_box *box, int v_x_screen, t_angle seg_to_normal, float dist_to_normal)
 {
 	static float MAX_SCALE_FACTOR = 64.0f;
@@ -46,6 +80,15 @@ static float	get_scale_factor(t_box *box, int v_x_screen, t_angle seg_to_normal,
 	return (scale_factor);
 }
 
+/**
+ * Draws upper section of the wall, usually the lowered ceiling of the next room
+ *
+ * @param t_box* box
+ * @param t_segment_render_data* render_data
+ * @param int ix
+ * @param int curr_ceiling
+ * @param int color
+ */
 static void draw_upper_section(t_box *box, t_segment_render_data *render_data, int ix, int curr_ceiling, int color)
 {
 	if (render_data->b_draw_upper_section)
@@ -68,6 +111,15 @@ static void draw_upper_section(t_box *box, t_segment_render_data *render_data, i
 		box->map->ceiling_clip_height[ix] = curr_ceiling - 1;
 }
 
+/**
+ * Draws middle section of the wall
+ *
+ * @param t_box* box
+ * @param int ix
+ * @param int curr_ceiling
+ * @param int curr_floor
+ * @param int color
+ */
 static void draw_middle_section(t_box *box, int ix, int curr_ceiling, int curr_floor, int color)
 {
 	draw_line(&box->image, ix, curr_ceiling, ix, curr_floor, color);
@@ -75,6 +127,15 @@ static void draw_middle_section(t_box *box, int ix, int curr_ceiling, int curr_f
 	box->map->floor_clip_height[ix] = -1;
 }
 
+/**
+ * Draws lower section of the wall, usually the raised floor of the next room
+ *
+ * @param t_box* box
+ * @param t_segment_render_data* render_data
+ * @param int ix
+ * @param int curr_floor
+ * @param int color
+ */
 static void draw_lower_section(t_box *box, t_segment_render_data *render_data, int ix, int curr_floor, int color)
 {
 	if (render_data->b_draw_lower_section)
@@ -97,6 +158,15 @@ static void draw_lower_section(t_box *box, t_segment_render_data *render_data, i
 		box->map->floor_clip_height[ix] = curr_floor + 1;
 }
 
+/**
+ * Validates the range of the ceiling and floor
+ *
+ * @param t_box* box
+ * @param t_segment_render_data* render_data
+ * @param int* ix
+ * @param int* curr_ceiling
+ * @param int* curr_floor
+ */
 static bool	validate_range(t_box *box, t_segment_render_data *render_data, int *ix, int *curr_ceiling, int *curr_floor)
 {
 	if (*curr_ceiling < box->map->ceiling_clip_height[*ix] + 1)
@@ -115,6 +185,12 @@ static bool	validate_range(t_box *box, t_segment_render_data *render_data, int *
 	return (true);
 }
 
+/**
+ * Renders a segment on the screen
+ *
+ * @param t_box* box
+ * @param t_segment_render_data* render_data
+ */
 static void	render_segment(t_box *box, t_segment_render_data *render_data)
 {
 	int color, curr_ceiling, curr_floor;
@@ -147,6 +223,12 @@ static void	render_segment(t_box *box, t_segment_render_data *render_data)
 	}
 }
 
+/**
+ * Updates the ceiling and floor flags
+ *
+ * @param t_box* box
+ * @param t_segment_render_data* render_data
+ */
 static void	ceiling_floor_update(t_box *box, t_segment_render_data *render_data)
 {
 	if (!render_data->p_seg->p_left_sector)
@@ -179,6 +261,15 @@ static void	ceiling_floor_update(t_box *box, t_segment_render_data *render_data)
 		render_data->update_floor = false;
 }
 
+/**
+ * Calculates the height of the wall and renders it
+ *
+ * @param t_box* box
+ * @param int v1_x_screen
+ * @param int v2_x_screen
+ * @param t_angle v1_angle
+ * @param t_seg seg
+ */
 static void	calculate_wall_height(t_box *box, int v1_x_screen, int v2_x_screen, t_angle v1_angle, t_seg seg)
 {
 	t_angle seg_to_normal_angle = new_angle(seg.angle.angle_val + 90);
@@ -236,6 +327,15 @@ static void	calculate_wall_height(t_box *box, int v1_x_screen, int v2_x_screen, 
 	render_segment(box, &render_data);
 }
 
+/**
+ * Draws passable walls from near to far, makign sure that the walls are not drawn over each other
+ *
+ * @param t_box* box
+ * @param int v1_x_screen
+ * @param int v2_x_screen
+ * @param t_angle v1_angle
+ * @param t_seg seg
+ */
 static void	clip_pass_wall(t_box *box, int v1_x_screen, int v2_x_screen, t_angle v1_angle, t_seg seg)
 {
 	t_solid_seg	*foundWall = NULL, *nextWall = NULL, currWall = {v1_x_screen, v2_x_screen, NULL};
@@ -273,16 +373,13 @@ static void	clip_pass_wall(t_box *box, int v1_x_screen, int v2_x_screen, t_angle
 }
 
 /**
- * clip_wall()
- * -----------
+ * Draws solid walls from near to far, makign sure that the walls are not drawn over each other
  *
- * Clips and draws a wall segment
- *
- * param: t_box *box
- * param: t_solid_seg currWall
- * param: int m
- *
- * return: 0
+ * @param t_box* box
+ * @param int v1_x_screen
+ * @param int v2_x_screen
+ * @param t_angle v1_angle
+ * @param t_seg seg
  */
 static void	clip_solid_wall(t_box *box, int v1_x_screen, int v2_x_screen, t_angle v1_angle, t_seg seg)
 {
@@ -340,7 +437,16 @@ static void	clip_solid_wall(t_box *box, int v1_x_screen, int v2_x_screen, t_angl
 	}
 }
 
-void	add_wall_in_fov(t_box *box, t_angle v1_angle, t_angle v1_angle_from_player, t_angle v2_angle_from_player, t_seg seg)
+/**
+ * Adds a wall in player's FOV
+ *
+ * @param t_box* box
+ * @param t_angle v1_angle
+ * @param t_angle v1_angle_from_player
+ * @param t_angle v2_angle_from_player
+ * @param t_seg seg
+ */
+static void	add_wall_in_fov(t_box *box, t_angle v1_angle, t_angle v1_angle_from_player, t_angle v2_angle_from_player, t_seg seg)
 {
 	int v1_x = angle_to_screen(v1_angle_from_player);
 	int v2_x = angle_to_screen(v2_angle_from_player);
@@ -369,6 +475,19 @@ void	add_wall_in_fov(t_box *box, t_angle v1_angle, t_angle v1_angle_from_player,
 	}
 }
 
+/**
+ * Clips vertexes in player's FOV and fills angle struct pointers
+ *
+ * @param t_box* box
+ * @param t_vertex v1
+ * @param t_vertex v2
+ * @param t_angle* v1_angle
+ * @param t_angle* v2_angle
+ * @param t_angle* v1_angle_from_player
+ * @param t_angle* v2_angle_from_player
+ *
+ * @return bool
+ */
 static bool	clip_vertexes_in_FOV(t_box *box, t_vertex v1, t_vertex v2, t_angle *v1_angle, t_angle *v2_angle, t_angle *v1_angle_from_player, t_angle *v2_angle_from_player)
 {
 	*v1_angle = angle_to_vortex(box, v1);
@@ -406,12 +525,20 @@ static bool	clip_vertexes_in_FOV(t_box *box, t_vertex v1, t_vertex v2, t_angle *
 	return (true);
 }
 
+/**
+ * Renders a subsector by rendering all the segs in it
+ *
+ * @param t_box* box
+ * @param int subsector_id
+ */
 static void	render_subsector(t_box *box, int subsector_id)
 {
-	t_WAD_ssector	subsector = box->WAD.maps[0].WAD_ssectors[subsector_id];
-	t_seg		seg;
+	t_WAD_ssector	subsector;
+	t_seg			seg;
+	uint32_t		i;
 
-	uint32_t	i = -1;
+	subsector = box->map->WAD_ssectors[subsector_id];
+	i = -1;
 	while (++i < subsector.seg_count)
 	{
 		seg = box->map->segs[subsector.first_seg_id + i];
@@ -430,6 +557,16 @@ static void	render_subsector(t_box *box, int subsector_id)
 	}
 }
 
+/**
+ * 	Checks if the point is on the left side of the node
+ *
+ * @param t_box* box
+ * @param int x
+ * @param int y
+ * @param int node_id
+ *
+ * @return bool
+ */
 static bool	is_point_on_left_side(t_box *box, int x, int y, int node_id)
 {
 	int dx = x - box->map->WAD_nodes[node_id].partition_x;
@@ -438,6 +575,12 @@ static bool	is_point_on_left_side(t_box *box, int x, int y, int node_id)
 	return (((dx * box->map->WAD_nodes[node_id].change_partition_y) - (dy * box->map->WAD_nodes[node_id].change_partition_x)) <= 0);
 }
 
+/**
+ * Binary search tree traversal with rendering of each leas subsector
+ *
+ * @param t_box* box
+ * @param int node_id - Id of the root node, usually the last node in the array
+ */
 void	render_bsp_nodes(t_box *box, int node_id)
 {
 	if (node_id & LEAF_NODE)

@@ -1,5 +1,13 @@
 #include "doom-nukem.h"
 
+/**
+ * 	Puts pixel to image
+ *
+ * 	@param t_image* image
+ * 	@param int x
+ * 	@param int y
+ * 	@param int color
+ */
 void	my_mlx_pyxel_put(t_image *image, int x, int y, int color)
 {
 	unsigned char	*pixel;
@@ -9,6 +17,17 @@ void	my_mlx_pyxel_put(t_image *image, int x, int y, int color)
 	*(unsigned int *)pixel = color;
 }
 
+/**
+ * 	Puts image to window
+ *
+ * 	@param t_box* box
+ * 	@param t_image* image
+ * 	@param int x
+ * 	@param int y
+ * 	@param int sprite_id
+ *
+ * 	@return If sprite_id is negative, whole image will be put
+ */
 void	my_mlx_put_image_to_window(t_box *box, t_image *image, int x, int y, int sprite_id)
 {
 	if (sprite_id >= 0)
@@ -17,6 +36,16 @@ void	my_mlx_put_image_to_window(t_box *box, t_image *image, int x, int y, int sp
 		mlx_put_image_to_window(box->mlx, box->win, image->img, x, y, 0, 0, image->width, image->height);
 }
 
+/**
+ * 	Draws line on image from begin point to end point
+ *
+ * 	@param t_image* image
+ * 	@param int beginX
+ * 	@param int beginY
+ * 	@param int endX
+ * 	@param int endY
+ * 	@param int color
+ */
 void	draw_line(t_image *image, int beginX, int beginY, int endX, int endY, int color)
 {
 	if (beginY < 0)
@@ -44,30 +73,16 @@ void	draw_line(t_image *image, int beginX, int beginY, int endX, int endY, int c
 	}
 }
 
-void	draw_rect(t_box *box, t_rect rect, bool filled)
-{
-	uint32_t x, y;
-
-	y = rect.y;
-	while (y++ < rect.y + rect.height)
-	{
-		x = rect.x;
-		while (x++ < rect.x + rect.width)
-			if (!filled)
-			{
-				if (x == rect.x || x == rect.x + rect.width || y == rect.y || y == rect.y + rect.height)
-					my_mlx_pyxel_put(&box->image, x, y, rect.color);
-			}
-			else
-				my_mlx_pyxel_put(&box->image, x, y, rect.color);
-	}
-}
-
-/*
-	new_image
-
-	Creates a new mlx_image_alpha and sets its variables
-*/
+/**
+ * 	Creates new image struct
+ *
+ * 	@param void* mlx
+ * 	@param t_image* image
+ * 	@param int width
+ * 	@param int height
+ *
+ * 	@return Filled image struct
+ */
 t_image	*new_image(void *mlx, t_image *image, int width, int height)
 {
 	image->img = mlx_new_image_alpha(mlx, width, height);
@@ -78,6 +93,15 @@ t_image	*new_image(void *mlx, t_image *image, int width, int height)
 	return (image);
 }
 
+/**
+ * 	Resizes image by n_times_bigger
+ *
+ * 	@param void* mlx_ptr
+ * 	@param t_image* src_img
+ * 	@param float n_times_bigger
+ *
+ * 	@return Resized image
+ */
 t_image	*img_resize(void *mlx_ptr, t_image *src_img, float n_times_bigger)
 {
 	t_image		dst_img;
@@ -108,11 +132,15 @@ t_image	*img_resize(void *mlx_ptr, t_image *src_img, float n_times_bigger)
 	return (src_img);
 }
 
-/*
-	png_file_to_image
+/**
+ * 	Tryes to convert png file to image struct
 
-	Tryes to convert png file to image
-*/
+ * 	@param void* mlx
+ * 	@param t_image* image
+ * 	@param char* file
+
+ * 	@return Filled image struct or error message
+ */
 void	png_file_to_image(void *mlx, t_image *image, char *file)
 {
 	cp_image_t	png_img;
@@ -141,13 +169,19 @@ void	png_file_to_image(void *mlx, t_image *image, char *file)
 	free(png_img.pix);
 }
 
-/*
-	split_spritesheet
 
-	Used on spritesheet images to split it into sprites with ids
-	Needs to know number of images in rows and collums beforehand
-	- This step can be done automatically in the future
-*/
+
+/**
+ * Modifies image values for use in accesing parts of it by ids
+ *
+ * @param t_image* image
+ * @param int n_col
+ * @param int n_row
+ * @param int one_x
+ * @param int one_y
+ *
+ * @return If one_X or one_Y is 0, it will be calculated
+ */
 void	split_spritesheet(t_image *image, int n_col, int n_row, int one_x, int one_y)
 {
 	image->n_col = n_col;
