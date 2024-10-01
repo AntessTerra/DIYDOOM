@@ -69,8 +69,11 @@ static int	parse_vertexes(t_box *box, uint32_t i, uint32_t m)
 {
 	box->WAD.maps[m].n_vertexes = box->WAD.dirs[i].lump_size / sizeof(struct s_vertex);
 	box->WAD.maps[m].vertexes = malloc(box->WAD.dirs[i].lump_size);
+	if (!box->WAD.maps[m].vertexes)
+		exit_hook(box, "ERROR WHILE MALLOCING VERTEXES\n");
 	lseek(box->WAD.fd, box->WAD.dirs[i].lump_offset, SEEK_SET);
-	read(box->WAD.fd, (void *)&box->WAD.maps[m].vertexes[0], box->WAD.dirs[i].lump_size);
+	if (read(box->WAD.fd, (void *)&box->WAD.maps[m].vertexes[0], box->WAD.dirs[i].lump_size) < 0)
+		exit_hook(box, "ERROR WHILE READING VERTEXES\n");
 	find_min_max_vertexes(box, m);
 	return (0);
 }
@@ -79,8 +82,11 @@ static int	parse_things(t_box *box, uint32_t i, uint32_t m)
 {
 	box->WAD.maps[m].n_things = box->WAD.dirs[i].lump_size / sizeof(struct s_WAD_thing);
 	box->WAD.maps[m].WAD_things = malloc(box->WAD.dirs[i].lump_size);
+	if (!box->WAD.maps[m].WAD_things)
+		exit_hook(box, "ERROR WHILE MALLOCING WAD THINGS\n");
 	lseek(box->WAD.fd, box->WAD.dirs[i].lump_offset, SEEK_SET);
-	read(box->WAD.fd, (void *)&box->WAD.maps[m].WAD_things[0], box->WAD.dirs[i].lump_size);
+	if (read(box->WAD.fd, (void *)&box->WAD.maps[m].WAD_things[0], box->WAD.dirs[i].lump_size) < 0)
+		exit_hook(box, "ERROR WHILE READING WAD THINGS\n");
 	// Init player
 	box->WAD.maps[m].player.x = box->WAD.maps[m].WAD_things[0].x;
 	box->WAD.maps[m].player.y = box->WAD.maps[m].WAD_things[0].y;
@@ -93,8 +99,11 @@ static int	parse_linedefs(t_box *box, uint32_t i, uint16_t m)
 {
 	box->WAD.maps[m].n_linedefs = box->WAD.dirs[i].lump_size / sizeof(struct s_WAD_linedef);
 	box->WAD.maps[m].WAD_linedefs = malloc(box->WAD.dirs[i].lump_size);
+	if (!box->WAD.maps[m].WAD_linedefs)
+		exit_hook(box, "ERROR WHILE MALLOCING WAD LINEDEFS\n");
 	lseek(box->WAD.fd, box->WAD.dirs[i].lump_offset, SEEK_SET);
-	read(box->WAD.fd, (void *)&box->WAD.maps[m].WAD_linedefs[0], box->WAD.dirs[i].lump_size);
+	if (read(box->WAD.fd, (void *)&box->WAD.maps[m].WAD_linedefs[0], box->WAD.dirs[i].lump_size) < 0)
+		exit_hook(box, "ERROR WHILE READING WAD LINEDEFS\n");
 	return (0);
 }
 
@@ -102,8 +111,11 @@ static int	parse_nodes(t_box *box, uint32_t i, uint32_t m)
 {
 	box->WAD.maps[m].n_nodes = box->WAD.dirs[i].lump_size / sizeof(struct s_WAD_node);
 	box->WAD.maps[m].WAD_nodes = malloc(box->WAD.dirs[i].lump_size);
+	if (!box->WAD.maps[m].WAD_nodes)
+		exit_hook(box, "ERROR WHILE MALLOCING WAD NODES\n");
 	lseek(box->WAD.fd, box->WAD.dirs[i].lump_offset, SEEK_SET);
-	read(box->WAD.fd, (void *)&box->WAD.maps[m].WAD_nodes[0], box->WAD.dirs[i].lump_size);
+	if (read(box->WAD.fd, (void *)&box->WAD.maps[m].WAD_nodes[0], box->WAD.dirs[i].lump_size) < 0)
+		exit_hook(box, "ERROR WHILE READING WAD NODES\n");
 	return (0);
 }
 
@@ -111,8 +123,11 @@ static int	parse_segs(t_box *box, uint32_t i, uint32_t m)
 {
 	box->WAD.maps[m].n_segs = box->WAD.dirs[i].lump_size / sizeof(struct s_WAD_seg);
 	box->WAD.maps[m].WAD_segs = malloc(box->WAD.dirs[i].lump_size);
+	if (!box->WAD.maps[m].WAD_segs)
+		exit_hook(box, "ERROR WHILE MALLOCING WAD SEGS\n");
 	lseek(box->WAD.fd, box->WAD.dirs[i].lump_offset, SEEK_SET);
-	read(box->WAD.fd, (void *)&box->WAD.maps[m].WAD_segs[0], box->WAD.dirs[i].lump_size);
+	if (read(box->WAD.fd, (void *)&box->WAD.maps[m].WAD_segs[0], box->WAD.dirs[i].lump_size) < 0)
+		exit_hook(box, "ERROR WHILE READING WAD SEGS\n");
 	return (0);
 }
 
@@ -120,8 +135,11 @@ static int	parse_ssectors(t_box *box, uint32_t i, uint32_t m)
 {
 	box->WAD.maps[m].n_ssectors = box->WAD.dirs[i].lump_size / sizeof(struct s_WAD_ssector);
 	box->WAD.maps[m].WAD_ssectors = malloc(box->WAD.dirs[i].lump_size);
+	if (!box->WAD.maps[m].WAD_ssectors)
+		exit_hook(box, "ERROR WHILE MALLOCING WAD SSECTORS\n");
 	lseek(box->WAD.fd, box->WAD.dirs[i].lump_offset, SEEK_SET);
-	read(box->WAD.fd, (void *)&box->WAD.maps[m].WAD_ssectors[0], box->WAD.dirs[i].lump_size);
+	if (read(box->WAD.fd, (void *)&box->WAD.maps[m].WAD_ssectors[0], box->WAD.dirs[i].lump_size) < 0)
+		exit_hook(box, "ERROR WHILE READING WAD SSECTORS\n");
 	return (0);
 }
 
@@ -129,8 +147,11 @@ static int	parse_sidedefs(t_box *box, uint32_t i, uint32_t m)
 {
 	box->WAD.maps[m].n_sidedefs = box->WAD.dirs[i].lump_size / sizeof(struct s_WAD_sidedef);
 	box->WAD.maps[m].WAD_sidedefs = malloc(box->WAD.dirs[i].lump_size);
+	if (!box->WAD.maps[m].WAD_sidedefs)
+		exit_hook(box, "ERROR WHILE MALLOCING WAD SIDEDEFS\n");
 	lseek(box->WAD.fd, box->WAD.dirs[i].lump_offset, SEEK_SET);
-	read(box->WAD.fd, (void *)&box->WAD.maps[m].WAD_sidedefs[0], box->WAD.dirs[i].lump_size);
+	if (read(box->WAD.fd, (void *)&box->WAD.maps[m].WAD_sidedefs[0], box->WAD.dirs[i].lump_size) < 0)
+		exit_hook(box, "ERROR WHILE READING WAD SIDEDEFS\n");
 	return (0);
 }
 
@@ -138,8 +159,11 @@ static int	parse_sectors(t_box *box, uint32_t i, uint32_t m)
 {
 	box->WAD.maps[m].n_sectors = box->WAD.dirs[i].lump_size / sizeof(struct s_WAD_sector);
 	box->WAD.maps[m].WAD_sectors = malloc(box->WAD.dirs[i].lump_size);
+	if (!box->WAD.maps[m].WAD_sectors)
+		exit_hook(box, "ERROR WHILE MALLOCING WAD SECTORS\n");
 	lseek(box->WAD.fd, box->WAD.dirs[i].lump_offset, SEEK_SET);
-	read(box->WAD.fd, (void *)&box->WAD.maps[m].WAD_sectors[0], box->WAD.dirs[i].lump_size);
+	if (read(box->WAD.fd, (void *)&box->WAD.maps[m].WAD_sectors[0], box->WAD.dirs[i].lump_size) < 0)
+		exit_hook(box, "ERROR WHILE READING WAD SECTORS\n");
 	return (0);
 }
 
@@ -157,6 +181,8 @@ static int	build_sidedefs(t_box *box, uint32_t m)
 	}
 	i = -1;
 	box->WAD.maps[m].sidedefs = malloc(box->WAD.maps[m].n_sidedefs * sizeof(struct s_sidedef));
+	if (!box->WAD.maps[m].sidedefs)
+		exit_hook(box, "ERROR WHILE MALLOCING SIDEDEFS\n");
 	while (++i < box->WAD.maps[m].n_sidedefs)
 	{
 		sidedef = &box->WAD.maps[m].sidedefs[i];
@@ -180,6 +206,8 @@ static int	build_linedefs(t_box *box, uint32_t m)
 
 	i = -1;
 	box->WAD.maps[m].linedefs = malloc(box->WAD.maps[m].n_linedefs * sizeof(struct s_linedef));
+	if (!box->WAD.maps[m].linedefs)
+		exit_hook(box, "ERROR WHILE MALLOCING LINEDEFS\n");
 	while (++i < box->WAD.maps[m].n_linedefs)
 	{
 		linedef = &box->WAD.maps[m].linedefs[i];
@@ -209,6 +237,8 @@ static int	build_segs(t_box *box, uint32_t m)
 
 	i = -1;
 	box->WAD.maps[m].segs = malloc(box->WAD.maps[m].n_segs * sizeof(struct s_seg));
+	if (!box->WAD.maps[m].segs)
+		exit_hook(box, "ERROR WHILE MALLOCING SEGS\n");
 	while (++i < box->WAD.maps[m].n_segs)
 	{
 		seg = &box->WAD.maps[m].segs[i];
@@ -283,26 +313,34 @@ int	parser(t_box *box)
 {
 	uint32_t	i;
 
+	box->WAD.fd = 0;
 	box->WAD.fd = open("DOOM.WAD", O_RDONLY);
 	if (!box->WAD.fd)
-		return (printf("ERROR WHILE OPENING WAD FILE\n"), 1);
+		exit_hook(box, "ERROR WHILE OPENING WAD FILE\n");
 
 	ft_memset(box->WAD.header.type, 0 , 5);
-	read(box->WAD.fd, box->WAD.header.type, 4);
-	read(box->WAD.fd, (void *)&box->WAD.header.dir_count, 4);
-	read(box->WAD.fd, (void *)&box->WAD.header.dir_offset, 4);
+	if (read(box->WAD.fd, box->WAD.header.type, 4) < 0)
+		exit_hook(box, "ERROR WHILE READING WAD HEADER\n");
+	if (read(box->WAD.fd, (void *)&box->WAD.header.dir_count, 4) < 0)
+		exit_hook(box, "ERROR WHILE READING WAD HEADER\n");
+	if (read(box->WAD.fd, (void *)&box->WAD.header.dir_offset, 4) < 0)
+		exit_hook(box, "ERROR WHILE READING WAD HEADER\n");
 
 	// printf("%s | %i | %i\n", box->WAD.header.type, box->WAD.header.dir_count, box->WAD.header.dir_offset);
 
 	lseek(box->WAD.fd, box->WAD.header.dir_offset, SEEK_SET);
 
+	box->WAD.dirs = NULL;
 	box->WAD.dirs = malloc(box->WAD.header.dir_count * sizeof(struct s_directory));
+	if (!box->WAD.dirs)
+		exit_hook(box, "ERROR WHILE ALLOCATING MEMORY FOR DIRECTORIES\n");
 
 	i = -1;
 	while (++i < box->WAD.header.dir_count)
 	{
 		ft_memset(box->WAD.dirs[i].name, 0 , 9);
-		read(box->WAD.fd, (void *)&box->WAD.dirs[i], 16);
+		if (read(box->WAD.fd, (void *)&box->WAD.dirs[i], 16) < 0)
+			exit_hook(box, "ERROR WHILE READING DIRECTORIES\n");
 	}
 	parse_maps(box);
 

@@ -138,10 +138,12 @@ typedef struct s_box
 	t_image			*textures;
 	t_WAD			WAD;
 	t_map			*map;
+	struct timeval	time;
+	struct timeval	old_time;
 }				t_box;
 
 //Hook.c
-int			exit_hook(t_box *box);
+int			exit_hook(t_box *box, char *msg);
 int			key_press(int key, t_box *box);
 int			key_release(int key, t_box *box);
 int			mouse_press(int keycode, int x, int y, t_box *box);
@@ -152,8 +154,9 @@ int			mouse_move(int x, int y, t_box *box);
 int			parser(t_box *box);
 
 //Values.c
+void		null_starter_values(t_box *box);
 void		init_textures(t_box *box);
-void		init_values(t_box *box);
+int			init_values(t_box *box);
 t_solid_seg	*new_solid_seg(int start, int end);
 void		add_solid_seg_before(t_box *box, t_solid_seg *where, t_solid_seg *what);
 void		delete_seg(t_box *box, t_solid_seg *first, t_solid_seg *last);

@@ -58,7 +58,10 @@ void	add_solid_seg_before(t_box *box, t_solid_seg *where, t_solid_seg *what)
 {
 	t_solid_seg	*curr, *tmp;
 
-	if (box->map->solid_segs == NULL)
+	if (!what)
+		exit_hook(box, "ERROR WHILE ADDING SOLID SEG\n");
+
+	if (!box->map->solid_segs)
 	{
 		box->map->solid_segs = what;
 		return ;
@@ -91,7 +94,10 @@ t_solid_seg	*new_solid_seg(int start, int end)
 {
 	t_solid_seg	*seg;
 
+	seg = NULL;
 	seg = malloc(sizeof(t_solid_seg));
+	if (!seg)
+		return (NULL);
 	seg->x_start = start;
 	seg->x_end = end;
 	seg->next = NULL;
@@ -195,40 +201,88 @@ int	get_wall_color(t_box *box, char *str)
 }
 
 /**
+ * NULLs all the starter values
+ *
+ * @param t_box* box
+ */
+void	null_starter_values(t_box *box)
+{
+	int	m;
+
+	box->mlx = NULL;
+	box->win = NULL;
+	box->image.img = NULL;
+	box->minimap.img = NULL;
+	box->WAD.dirs = NULL;
+	box->map = NULL;
+	m = -1;
+	while (++m < N_MAPS)
+	{
+		box->WAD.maps[m].vertexes = NULL;
+		box->WAD.maps[m].WAD_things = NULL;
+		box->WAD.maps[m].WAD_linedefs = NULL;
+		box->WAD.maps[m].WAD_nodes = NULL;
+		box->WAD.maps[m].WAD_segs = NULL;
+		box->WAD.maps[m].WAD_ssectors = NULL;
+		box->WAD.maps[m].WAD_sidedefs = NULL;
+		box->WAD.maps[m].WAD_sectors = NULL;
+		box->WAD.maps[m].sidedefs = NULL;
+		box->WAD.maps[m].linedefs = NULL;
+		box->WAD.maps[m].segs = NULL;
+
+		box->WAD.maps[m].solid_segs = NULL;
+		box->WAD.maps[m].screen_x_to_angle = NULL;
+		box->WAD.maps[m].floor_clip_height = NULL;
+		box->WAD.maps[m].ceiling_clip_height = NULL;
+	}
+	box->textures = NULL;
+}
+
+/**
  * Initializes all the values used in the game
  *
  * @param t_box* box
  */
-void	init_values(t_box *box)
+int	init_values(t_box *box)
 {
+	gettimeofday(&box->time, NULL);
+	box->old_time = box->time;
+
 	box->map = &box->WAD.maps[0];
 	box->map->player.move_x = 0;
 	box->map->player.move_y = 0;
 	box->map->player.move_z = 0;
 	box->map->player.rotate = 0;
-	box->map->solid_segs = NULL;
+	box->map->player.sprint = false;
+
+	box->map->automap_scale_factor = 20;
+	box->map->player.speed = 100;
+
 	add_solid_seg_before(box, NULL, new_solid_seg(SCREENWIDTH, INT_MAX));
 	add_solid_seg_before(box, NULL, new_solid_seg(INT_MIN, -1));
 
-	box->map->automap_scale_factor = 20;
-	box->map->player.move_speed = 0.5;
-
 	box->map->screen_x_to_angle = malloc((SCREENWIDTH + 1) * sizeof(t_angle));
+	if (!box->map->screen_x_to_angle)
+		exit_hook(box, "ERROR WHILE MALLOCING SCREEN_X_TO_ANGLE\n");
 	box->map->player.dist_to_screen = (SCREENWIDTH / 2) / get_tan_value((t_angle){FOV / 2});
 	int i = -1;
 	while (++i <= SCREENWIDTH)
 		box->map->screen_x_to_angle[i].angle_val = atan(((SCREENWIDTH / 2) - i) / (float)box->map->player.dist_to_screen) * 180 / M_PI;
 
 	box->map->floor_clip_height = malloc((SCREENWIDTH + 1) * sizeof(int));
+	if (!box->map->floor_clip_height)
+		exit_hook(box, "ERROR WHILE MALLOCING FLOOR_CLIP_HEIGHT\n");
 	i = -1;
 	while (++i <= SCREENWIDTH)
 		box->map->floor_clip_height[i] = SCREENHEIGHT;
 
 	box->map->ceiling_clip_height = malloc((SCREENWIDTH + 1) * sizeof(int));
+	if (!box->map->ceiling_clip_height)
+		exit_hook(box, "ERROR WHILE MALLOCING CEILING_CLIP_HEIGHT\n");
 	i = -1;
 	while (++i <= SCREENWIDTH)
 		box->map->ceiling_clip_height[i] = -1;
-
+	return (0);
 }
 
 /**

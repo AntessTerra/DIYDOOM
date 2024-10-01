@@ -103,7 +103,7 @@ static void	update_screen(t_box *box)
  *
  * @param t_box* box
  */
-static int	timer(t_box *box)
+int	timer(t_box *box)
 {
 	calc_move(box);
 	update_screen(box);
@@ -117,14 +117,21 @@ int	main(void)
 {
 	t_box	box;
 
-	parser(&box);
+	null_starter_values(&box);
 
 	box.mlx = mlx_init();
+	if (!box.mlx)
+		exit_hook(&box, "ERROR WHILE INITIALIZING MLX\n");
+
 	box.win = mlx_new_window(box.mlx, SCREENWIDTH, SCREENHEIGHT, "doom-nukem");
-	init_values(&box);
-	init_textures(&box);
-	new_image(box.mlx, &box.image, SCREENWIDTH, SCREENHEIGHT);
-	new_image(box.mlx, &box.minimap, SCREENWIDTH / 4, SCREENHEIGHT / 4);
+	if (!box.win)
+		exit_hook(&box, "ERROR WHILE CREATING WINDOW\n");
+
+	if (!new_image(box.mlx, &box.image, SCREENWIDTH, SCREENHEIGHT))
+		exit_hook(&box, "ERROR WHILE CREATING IMAGE\n");
+	if (!new_image(box.mlx, &box.minimap, SCREENWIDTH / 4, SCREENHEIGHT / 4))
+		exit_hook(&box, "ERROR WHILE CREATING MINIMAP\n");
+
 	mlx_hook(box.win, 17, 0, exit_hook, &box);
 	mlx_hook(box.win, 2, 1L << 0, key_press, &box);
 	mlx_hook(box.win, 3, 1L << 1, key_release, &box);
@@ -132,12 +139,10 @@ int	main(void)
 	mlx_hook(box.win, 5, 1L << 3, mouse_release, &box);
 	mlx_hook(box.win, 6, 1L << 6, mouse_move, &box);
 
-	// render_fov(&box);
-	// draw_automap(&box);
-	// render_bsp_nodes(&box, box.WAD.maps[0].n_nodes - 1);
-
-	// update_screen(&box);
-	// print_solid_segs(&box, 0);
+	// exit_hook(&box);
+	parser(&box);
+	init_values(&box);
+	init_textures(&box);
 
 	mlx_loop_hook(box.mlx, timer, &box);
 	mlx_loop(box.mlx);

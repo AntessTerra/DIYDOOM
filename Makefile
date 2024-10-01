@@ -45,7 +45,7 @@ lib:
 $(NAME): $(OBJ)
 	@cc $(CFLAGS) -L $(LIBFT) -L $(MLX) -o $@ $^ cute_png/cute_png.o cute_sound/cute_sound.o $(MLX_FLAGS)
 
-val:
+val: $(NAME)
 	valgrind --leak-check=full --show-leak-kinds=all ./doom-nukem
 
 clean:

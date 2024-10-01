@@ -117,10 +117,13 @@ typedef struct s_player
 	double		y;
 	double		z;
 	double		move_speed;
-	int			rotate;
-	int			move_x;
-	int			move_y;
-	int			move_z;
+	double		rot_speed;
+	int			speed;
+	int16_t		rotate;
+	int16_t		move_x;
+	int16_t		move_y;
+	int16_t		move_z;
+	bool		sprint;
 	float		dist_to_screen;
 	t_angle		angle;
 }				t_player;
